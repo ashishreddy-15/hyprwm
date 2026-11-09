@@ -5,7 +5,7 @@ import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 
 // Tray drawer: "···" opens the tray icons inline (as in the Sway bar).
-// Left click activates an item, right click opens its menu.
+// Left click activates an item, right click opens its menu (TrayMenu.qml).
 Item {
     id: root
 
@@ -15,6 +15,9 @@ Item {
 
     implicitWidth: row.implicitWidth
     implicitHeight: fontSize * 1.4
+
+    // Menus drawn in the Horizon style (item.display() would use Qt's default look)
+    TrayMenu { id: trayMenu; fontSize: root.fontSize }
 
     Row {
         id: row
@@ -54,10 +57,7 @@ Item {
                         onClicked: mouse => {
                             const item = icon.modelData;
                             if (mouse.button === Qt.RightButton || item.onlyMenu) {
-                                if (item.hasMenu) {
-                                    const p = icon.mapToItem(null, 0, 0);
-                                    item.display(root.barWindow, Math.round(p.x), Math.round(p.y));
-                                }
+                                if (item.hasMenu) trayMenu.openAt(root.barWindow, icon, item.menu);
                             } else {
                                 item.activate();
                             }
