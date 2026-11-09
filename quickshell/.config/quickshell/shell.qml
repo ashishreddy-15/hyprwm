@@ -24,5 +24,6 @@ ShellRoot {
     Osd {}
     Launcher { id: launcher }
     PowerMenu { id: power }
-    Shortcuts { launcher: launcher; power: power; notifications: notifications }
+    Overview { id: overview }
+    Shortcuts { launcher: launcher; power: power; notifications: notifications; overview: overview }
 }

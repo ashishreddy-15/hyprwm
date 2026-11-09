@@ -11,6 +11,7 @@ Scope {
     required property var launcher
     required property var power
     required property var notifications
+    required property var overview
 
     GlobalShortcut { name: "launcher";      description: "Launcher: apps";             onPressed: root.launcher.toggle() }
     GlobalShortcut { name: "clipboard";     description: "Launcher: clipboard history"; onPressed: root.launcher.toggleMode("clipboard") }
@@ -19,6 +20,7 @@ Scope {
     GlobalShortcut { name: "power";         description: "Power menu";                 onPressed: root.power.toggle() }
     GlobalShortcut { name: "notif-history"; description: "Show the last notification"; onPressed: root.notifications.historyPop() }
     GlobalShortcut { name: "notif-clear";   description: "Dismiss all notifications";  onPressed: root.notifications.clearAll() }
+    GlobalShortcut { name: "overview";      description: "Workspace overview";        onPressed: root.overview.toggle() }
     GlobalShortcut { name: "bar";           description: "Show / hide the bar";       onPressed: Status.barShown = !Status.barShown }
     GlobalShortcut { name: "dnd";           description: "Do not disturb on/off";      onPressed: Status.toggleDnd() }
 }

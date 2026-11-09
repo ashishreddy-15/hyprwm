@@ -47,6 +47,9 @@ Singleton {
     })
 
     readonly property string wallpaper: "file://" + Quickshell.env("HOME") + "/.config/hypr/wallpaper.jpg"
+    // pre-blurred, dimmed copy for the overview backdrop; regenerate with
+    //   magick wallpaper.jpg -resize 1920x -blur 0x14 -modulate 78,90 -strip -quality 86 wallpaper-blur.jpg
+    readonly property string wallpaperBlur: "file://" + Quickshell.env("HOME") + "/.config/hypr/wallpaper-blur.jpg"
     readonly property string scripts: Quickshell.env("HOME") + "/.config/hypr/scripts/"
 
     function alpha(c, a) { return Qt.rgba(c.r, c.g, c.b, a) }

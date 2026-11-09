@@ -24,6 +24,7 @@ hl.bind(key("Return"),            exec(term))
 hl.bind(key("w"),                 exec("brave-origin"))
 hl.bind(key("e"),                 exec("nautilus -w"))     -- -w: always a new window
 hl.bind(key("b"),                 qs("bar"))               -- show / hide the bar
+hl.bind(key("o"),                 qs("overview"))          -- workspace overview
 hl.bind(key("q"),                 hl.dsp.window.close())
 hl.bind(key("d"),                 qs("launcher"))
 hl.bind(key("x"),                 qs("power"))

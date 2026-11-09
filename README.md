@@ -46,6 +46,11 @@ Popups top right, newest first, with a shrinking horizon line for time left
 (brightness, recording, night light) replace each other. History, clear all
 and do-not-disturb are on keys.
 
+**Workspace overview** (`Super+O`). The focused screen's workspaces as small
+live screens along the photo's horizon band, over a dimmed, blurred copy of
+the wallpaper. Click or Enter to go there, click a window to focus it, drag a
+window onto another card to move it; the last card opens a new workspace.
+
 **Also:** volume and brightness OSD above the bar, power menu that asks before
 logging out, rebooting or shutting down, tray menus for nm-applet and
 blueman drawn in the same style (not Qt's default), a lock screen with the
@@ -78,6 +83,7 @@ The values were tuned from frame-by-frame screen recordings (wf-recorder at
 | `Super+Return` · `Super+Shift+Return` | kitty · drop-down kitty |
 | `Super+W` · `Super+E` | Brave Origin · Nautilus (new window) |
 | `Super+B` | show / hide the bar |
+| `Super+O` | workspace overview: live previews; arrows / 1…0 / click to go, drag a window onto another workspace |
 | `Super+D` · `Super+C` · `Super+.` · `Super+V` | launcher: apps · calculator · emoji · clipboard |
 | `Super+X` · `Super+Shift+E` | power menu · log out |
 | `Super+Shift+Escape` | lock |

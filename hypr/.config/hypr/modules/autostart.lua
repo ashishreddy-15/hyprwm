@@ -16,7 +16,10 @@ local scripts = os.getenv("HOME") .. "/.config/hypr/scripts/"
 local nested  = os.getenv("HORIZON_NESTED") == "1"
 
 hl.on("hyprland.start", function()
-    hl.exec_cmd("qs")  -- wallpaper, bar, launcher, notifications, OSDs
+    -- wallpaper, bar, launcher, notifications, OSDs. Restarted after a crash
+    -- (e.g. Quickshell segfaulted once in QWindow::setScreen during a config
+    -- reload); a clean exit (status 0) ends the loop.
+    hl.exec_cmd("sh -c 'until qs; do sleep 1; done'")
     if nested then return end
 
     -- Share the session env with D-Bus/systemd, then start hyprland-session.target.
