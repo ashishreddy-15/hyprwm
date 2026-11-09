@@ -82,7 +82,7 @@ The values were tuned from frame-by-frame screen recordings (wf-recorder at
 | `Super+W` · `Super+S` | window group (tabs) · next tab |
 | `Super+B` · `Super+Shift+V` · `Super+E` | next window opens right · below · toggle split |
 | `Super+-` · `Super+Shift+-` | scratchpad show · send |
-| `Super+\`` · `Super+Shift+\`` · `Super+Shift+N` | last notification · clear all · do not disturb |
+| `` Super+` `` · `` Super+Shift+` `` · `Super+Shift+N` | last notification · clear all · do not disturb |
 | `Super+N` · `Super+Shift+A` | night light · appearance (GTK theme, icons, cursor, font) |
 | `Super+[` · `Super+]` | brightness (laptop panel or DDC monitor, whichever is focused) |
 | `Print` · `Alt+Print` · `Ctrl+Print` · `Shift+Print` | screenshot screen · window · area · record area |
