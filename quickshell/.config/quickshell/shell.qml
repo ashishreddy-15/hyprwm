@@ -20,8 +20,9 @@ ShellRoot {
 
     Wallpaper {}
     Bar {}
-    Notifications {}
+    Notifications { id: notifications }
     Osd {}
-    Launcher {}
-    PowerMenu {}
+    Launcher { id: launcher }
+    PowerMenu { id: power }
+    Shortcuts { launcher: launcher; power: power; notifications: notifications }
 }

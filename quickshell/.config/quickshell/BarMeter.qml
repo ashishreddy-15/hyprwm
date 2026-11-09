@@ -46,10 +46,10 @@ Item {
             Rectangle {
                 height: parent.height
                 radius: 1
-                width: Math.max(0, Math.min(1, root.fraction)) * track.width
+                Spring { id: fillW; preset: Theme.springs.settle; to: Math.max(0, Math.min(1, root.fraction)) * track.width }
+                width: fillW.value
                 color: root.tone
                 gradient: root.toned ? null : fill
-                Behavior on width { NumberAnimation { duration: Theme.normal; easing.type: Easing.OutQuint } }
             }
 
             Gradient {

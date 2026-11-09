@@ -64,14 +64,17 @@ Scope {
         WlrLayershell.namespace: "horizon-osd"
         exclusionMode: ExclusionMode.Ignore
         anchors.bottom: true
-        margins.bottom: (laptop ? 32 : 28) + 4 + 12   // just above the bar island
+        // just above the bar island, with 10 px of room below the box to rise through
+        margins.bottom: (laptop ? 32 : 28) + 4 + 2
         implicitWidth: Math.round(fontSize * 24)
-        implicitHeight: Math.round(fontSize * 3)
+        implicitHeight: Math.round(fontSize * 3) + 10
+        mask: Region {}   // display only: clicks go through
         color: "transparent"
 
         Rectangle {
             id: box
-            anchors.fill: parent
+            width: parent.width
+            height: parent.height - 10
             radius: 8
             color: Theme.alpha(Theme.surface, Theme.panelAlpha)
             border.color: Theme.border
@@ -79,9 +82,8 @@ Scope {
             opacity: root.shown ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.normal; easing.type: Easing.OutQuint } }
 
-            property real lift: root.shown ? 0 : 8
-            Behavior on lift { NumberAnimation { duration: Theme.normal; easing.type: Easing.OutQuint } }
-            transform: Translate { y: box.lift }
+            Spring { id: lift; preset: Theme.springs.rise; to: root.shown ? 0 : 10 }
+            transform: Translate { y: lift.value }
 
             // message
             Text {
@@ -122,13 +124,13 @@ Scope {
                         id: fill
                         height: parent.height
                         radius: 1
-                        width: Math.max(0, Math.min(1, root.value / 100)) * track.width
+                        Spring { id: fillW; preset: Theme.springs.settle; to: Math.max(0, Math.min(1, root.value / 100)) * track.width }
+                        width: fillW.value
                         gradient: Gradient {
                             orientation: Gradient.Horizontal
                             GradientStop { position: 0.0; color: Theme.sky }
                             GradientStop { position: 1.0; color: Theme.accent }
                         }
-                        Behavior on width { NumberAnimation { duration: Theme.fast; easing.type: Easing.OutQuint } }
                     }
 
                     // knob at the end of the fill

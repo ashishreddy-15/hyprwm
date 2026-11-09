@@ -119,8 +119,22 @@ if [[ ${1:-} == --sync ]]; then
     exit 0
 fi
 
+# Super+Shift+A while the menu is open closes it (even from a submenu): the
+# second run leaves a quit flag for the first, closes the menu, and exits.
+LOCK="${XDG_RUNTIME_DIR:-/tmp}/appearance.lock"
+QUIT="${XDG_RUNTIME_DIR:-/tmp}/appearance.quit"
+exec 9>"$LOCK"
+if ! flock -n 9; then
+    touch "$QUIT"
+    qs ipc call launcher close >/dev/null 2>&1 || true
+    exit 0
+fi
+rm -f "$QUIT"
+trap 'rm -f "$QUIT"' EXIT
+
 # Esc in a submenu goes back to the main menu; Esc on the main menu quits
 while true; do
+    if [[ -e $QUIT ]]; then rm -f "$QUIT"; exit 0; fi
     choice=$(printf '%s\n' "GTK theme" "Dark / Light" "Icons" "Cursor" "Font" | menu "Appearance") || exit 0
 
     case $choice in

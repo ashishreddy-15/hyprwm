@@ -178,12 +178,13 @@ Variants {
             readonly property real span: bar.fontSize * 11
 
             visible: center >= 0
-            x: center - span / 2
+            // drifts after the underline, like light catching up
+            Spring { id: glowX; preset: Theme.springs.drift; to: glow.center - glow.span / 2 }
+            x: glowX.value
             y: 2
             width: span
             height: 1
 
-            Behavior on x { NumberAnimation { duration: Theme.normal + 80; easing.type: Easing.OutQuint } }
 
             // soft halo
             Rectangle {

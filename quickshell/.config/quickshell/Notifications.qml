@@ -27,6 +27,15 @@ Scope {
     }
     function show(n) { popups = [n].concat(popups.filter(p => p !== n)).slice(0, 5) }
     function hide(n) { popups = popups.filter(p => p !== n) }
+    // re-show the latest notification that isn't on screen
+    function historyPop() {
+        const list = Array.from(server.trackedNotifications.values).filter(n => popups.indexOf(n) < 0);
+        if (list.length > 0) show(list[list.length - 1]);
+    }
+    function clearAll() {
+        for (const n of Array.from(server.trackedNotifications.values)) n.dismiss();
+        popups = [];
+    }
 
     NotificationServer {
         id: server
@@ -52,14 +61,8 @@ Scope {
     IpcHandler {
         target: "notifications"
 
-        function history(): void {
-            const list = Array.from(server.trackedNotifications.values).filter(n => root.popups.indexOf(n) < 0);
-            if (list.length > 0) root.show(list[list.length - 1]);
-        }
-        function clear(): void {
-            for (const n of Array.from(server.trackedNotifications.values)) n.dismiss();
-            root.popups = [];
-        }
+        function history(): void { root.historyPop() }
+        function clear(): void { root.clearAll() }
         function dnd(): void { Status.toggleDnd() }
     }
 

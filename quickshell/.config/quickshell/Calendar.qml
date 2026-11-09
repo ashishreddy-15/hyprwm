@@ -22,7 +22,7 @@ PanelWindow {
     function resetView() { const d = new Date(); view = new Date(d.getFullYear(), d.getMonth(), 1) }
     function shift(months) { view = new Date(view.getFullYear(), view.getMonth() + months, 1) }
 
-    onOpenChanged: if (open) { resetView(); rise.restart(); Qt.callLater(() => keys.forceActiveFocus()) }
+    onOpenChanged: if (open) { resetView(); rise.from(20); Qt.callLater(() => keys.forceActiveFocus()) }
 
     // 6 weeks of dates, starting on the locale's first weekday
     readonly property var days: {
@@ -40,22 +40,36 @@ PanelWindow {
     }
 
     screen: bar.screen
-    visible: open
+    // Always mapped (invisible and click-through while closed), so opening
+    // starts on the next frame instead of waiting for a new surface.
+    visible: true
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "horizon-calendar"
     WlrLayershell.keyboardFocus: open ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
     exclusionMode: ExclusionMode.Ignore
     anchors.bottom: true
-    margins.bottom: bar.islandHeight + 4 + 10
+    // 20 px of transparent room under the panel to rise through (the window
+    // clips anything drawn outside it); clicks there pass through to the bar
+    margins.bottom: bar.islandHeight + 4 - 10   // panel rests 10 px above the bar island
     implicitWidth: cell * 7 + 32
-    implicitHeight: panel.implicitHeight
+    implicitHeight: panel.implicitHeight + 20
+    mask: Region { item: open ? panel : null }
     color: "transparent"
 
     // Clicking the bar (e.g. the clock again) doesn't count as "outside"
+    // Click outside closes. Armed a moment after opening: the window stays
+    // mapped, and a grab started before the input mask is applied gets
+    // cleared straight away (which would close the panel on open).
     HyprlandFocusGrab {
+        id: grab
         windows: [cal, cal.bar]
-        active: cal.visible
-        onCleared: cal.open = false
+        active: false
+        onCleared: if (open) cal.open = false
+    }
+    Timer { id: armGrab; interval: 60; onTriggered: grab.active = open }
+    Connections {
+        target: cal
+        function onOpenChanged() { if (open) armGrab.restart(); else grab.active = false }
     }
 
     Rectangle {
@@ -67,9 +81,18 @@ PanelWindow {
         border.color: Theme.border
         border.width: 1
 
-        property real lift: 0
-        transform: Translate { y: panel.lift }
-        NumberAnimation { id: rise; target: panel; property: "lift"; from: 14; to: 0; duration: Theme.normal; easing.type: Easing.OutQuint }
+        // rises out of the bar on a spring, fading in over the first part of the way
+        Spring { id: rise; preset: Theme.springs.rise; to: 0 }
+        transform: Translate { y: rise.value }
+        // opacity leads the motion: fully visible by half-way, so the first
+        // frames (when a spring from rest has barely moved) aren't blank
+        opacity: open ? Math.min(1, 2 * (1 - rise.value / 20)) : (warmedUp ? 0 : 0.01)
+        // Drawn once at 1% (invisible) right after startup, so glyphs, icons and
+        // effects are ready; a first open paid ~70 ms for that in the recording.
+        property bool warmedUp: false
+        Timer { running: true; interval: 1000; onTriggered: panel.warmedUp = true }
+        // closing: a quick fade, no movement
+        Behavior on opacity { enabled: !open; NumberAnimation { duration: 90 } }
 
         Item {
             id: keys

@@ -23,12 +23,20 @@ Item {
     implicitWidth: row.implicitWidth
     implicitHeight: parent ? parent.height : fontSize * 2
 
+    // Keeps one delegate per workspace across updates, so the row can animate
+    // numbers making room instead of rebuilding (a plain JS array would)
+    ScriptModel { id: spaceModel; values: root.spaces }
+
     Row {
         id: row
         height: parent.height
 
+        // a workspace appearing fades in; the others slide aside
+        add: Transition { NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 220; easing.type: Easing.OutCubic } }
+        move: Transition { NumberAnimation { properties: "x"; duration: 260; easing.type: Easing.OutCubic } }
+
         Repeater {
-            model: root.spaces
+            model: spaceModel
 
             delegate: Item {
                 id: ws
@@ -75,13 +83,15 @@ Item {
         }
     }
 
-    // The horizon line under the active workspace
+    // The horizon line under the active workspace glides between numbers
+    Spring { id: lineX; preset: Theme.springs.glide; to: root.activeItem ? root.activeItem.x + 3 : 0 }
+    Spring { id: lineW; preset: Theme.springs.glide; to: root.activeItem ? root.activeItem.width - 6 : 0 }
     Rectangle {
         visible: root.activeItem !== null
         height: 1
         y: root.height - 3
-        x: root.activeItem ? root.activeItem.x + 3 : 0
-        width: root.activeItem ? root.activeItem.width - 6 : 0
+        x: lineX.value
+        width: lineW.value
         opacity: root.monitor && root.monitor.focused ? 1 : 0.45
         gradient: Gradient {
             orientation: Gradient.Horizontal
@@ -89,8 +99,6 @@ Item {
             GradientStop { position: 0.5; color: Theme.accent }
             GradientStop { position: 1.0; color: Theme.alpha(Theme.accent, 0) }
         }
-        Behavior on x { NumberAnimation { duration: Theme.normal; easing.type: Easing.OutQuint } }
-        Behavior on width { NumberAnimation { duration: Theme.normal; easing.type: Easing.OutQuint } }
         Behavior on opacity { NumberAnimation { duration: Theme.fast } }
     }
 }

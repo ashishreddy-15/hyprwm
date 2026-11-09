@@ -17,7 +17,8 @@ import Quickshell.Widgets
 // Backspace on an empty query goes back to apps. Clicking outside closes.
 //
 //   qs ipc call launcher toggle
-//   qs ipc call launcher open apps|calc|emoji|clipboard
+//   qs ipc call launcher open apps|calc|emoji|clipboard   (again: close)
+//   qs ipc call launcher close
 //
 // Menu mode (a Quickshell `dmenu` for scripts): ~/.config/hypr/scripts/qs-dmenu
 // pipes options in, this writes the chosen line (or an empty line on cancel)
@@ -44,15 +45,19 @@ Scope {
         input.text = "";
         open = true;
         if (m === "clipboard") clipList.running = true;
-        rise.restart();
+        rise.from(20);
         Qt.callLater(() => input.forceActiveFocus());
     }
     function hide() { open = false; answer("") }
+    function toggle() { if (open) hide(); else show("apps") }
+    // the same key again closes it (Super+V, Super+C, Super+.)
+    function toggleMode(m) { if (open && baseMode === m) hide(); else show(m) }
 
     IpcHandler {
         target: "launcher"
-        function toggle(): void { if (root.open) root.hide(); else root.show("apps") }
-        function open(mode: string): void { root.show(mode) }
+        function toggle(): void { root.toggle() }
+        function open(mode: string): void { root.toggleMode(mode) }
+        function close(): void { root.hide() }
         function dmenu(prompt: string, current: string, options: string, out: string): void {
             root.answer("");
             root.dmenuPrompt = prompt;
@@ -188,8 +193,9 @@ Scope {
     }
 
     // ── Results for the current mode ──
+    // Computed while closed too, so opening doesn't build the list (that cost a
+    // 44 ms first frame in the recording)
     readonly property var results: {
-        if (!open) return [];
         if (mode === "apps") return appResults();
         if (mode === "emoji") return emojiResults();
         if (mode === "clipboard") return clipResults();
@@ -242,21 +248,35 @@ Scope {
         readonly property int rowHeight: Math.round(fontSize * 2.6)
         readonly property int maxRows: 8
 
-        visible: root.open
+        // Always mapped (invisible and click-through while closed), so opening
+        // starts on the next frame instead of waiting for a new surface.
+        visible: true
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.namespace: "horizon-launcher"
         WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
         exclusionMode: ExclusionMode.Ignore
         anchors.bottom: true
-        margins.bottom: (laptop ? 32 : 28) + 4 + 10   // just above the bar island
+        // 20 px of transparent room under the panel to rise through (the window
+        // clips anything drawn outside it); clicks there pass through to the bar
+        margins.bottom: (laptop ? 32 : 28) + 4 - 10   // panel rests 10 px above the bar island
         implicitWidth: Math.round(fontSize * 42)
-        implicitHeight: panel.implicitHeight
+        implicitHeight: panel.implicitHeight + 20
+        mask: Region { item: root.open ? panel : null }
         color: "transparent"
 
+        // Click outside closes. Armed a moment after opening: the window stays
+        // mapped, and a grab started before the input mask is applied gets
+        // cleared straight away (which would close the panel on open).
         HyprlandFocusGrab {
+            id: grab
             windows: [win]
-            active: win.visible
-            onCleared: root.hide()
+            active: false
+            onCleared: if (root.open) root.hide()
+        }
+        Timer { id: armGrab; interval: 60; onTriggered: grab.active = root.open }
+        Connections {
+            target: root
+            function onOpenChanged() { if (root.open) armGrab.restart(); else grab.active = false }
         }
 
         Rectangle {
@@ -268,9 +288,18 @@ Scope {
             border.color: Theme.border
             border.width: 1
 
-            property real lift: 0
-            transform: Translate { y: panel.lift }
-            NumberAnimation { id: rise; target: panel; property: "lift"; from: 14; to: 0; duration: Theme.normal; easing.type: Easing.OutQuint }
+            // rises out of the bar on a spring, fading in over the first part of the way
+            Spring { id: rise; preset: Theme.springs.rise; to: 0 }
+            transform: Translate { y: rise.value }
+            // opacity leads the motion: fully visible by half-way, so the first
+            // frames (when a spring from rest has barely moved) aren't blank
+            opacity: root.open ? Math.min(1, 2 * (1 - rise.value / 20)) : (warmedUp ? 0 : 0.01)
+            // Drawn once at 1% (invisible) right after startup, so glyphs, icons and
+            // effects are ready; a first open paid ~70 ms for that in the recording.
+            property bool warmedUp: false
+            Timer { running: true; interval: 1000; onTriggered: panel.warmedUp = true }
+            // closing: a quick fade, no movement
+            Behavior on opacity { enabled: !root.open; NumberAnimation { duration: 90 } }
 
             Column {
                 id: body

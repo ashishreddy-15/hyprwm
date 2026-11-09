@@ -26,9 +26,20 @@ Singleton {
 
     readonly property string font: "Maple Mono NF"
 
-    // Motion: short, ease-out, one direction
+    // Motion: fades use these durations; movement uses springs (Spring.qml)
     readonly property int fast: 160
     readonly property int normal: 260
+
+    // Horizon springs, tuned from a frame-by-frame screen recording.
+    // Light doesn't bounce: damping ratio ζ = d / (2·√(k·m)) ≈ 0.9–0.95.
+    // Small moves (a 20 px panel rise) need softer springs than big ones, or
+    // they finish in 2–3 frames and read as a pop instead of motion.
+    readonly property var springs: ({
+        rise:   { stiffness: 300, damping: 31.2, mass: 1 },  // panels rising 20 px out of the bar (~8 frames)
+        settle: { stiffness: 450, damping: 39.0, mass: 1 },  // meters, notifications, numbers making room
+        glide:  { stiffness: 350, damping: 35.5, mass: 1 },  // the workspace underline (~12 frames)
+        drift:  { stiffness: 200, damping: 26.9, mass: 1 }   // the edge glow, trailing the underline like light
+    })
 
     readonly property string wallpaper: "file://" + Quickshell.env("HOME") + "/.config/hypr/wallpaper.jpg"
     readonly property string scripts: Quickshell.env("HOME") + "/.config/hypr/scripts/"

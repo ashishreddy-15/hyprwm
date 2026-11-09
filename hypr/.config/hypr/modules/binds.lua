@@ -6,7 +6,8 @@
 --   Super+minus  scratchpad → special workspace "scratch"
 --   Super+A      focus parent: dropped (Hyprland has no container tree)
 --   Super+R      resize mode → Super+Ctrl+HJKL resizes directly
--- Menus, notifications and OSDs are Quickshell, called over `qs ipc`.
+-- Menus and notifications are Quickshell, reached through Hyprland's global
+-- shortcuts (no process per key press; see quickshell/Shortcuts.qml).
 
 local mod     = "SUPER"
 local term    = "kitty"
@@ -14,19 +15,17 @@ local scripts = os.getenv("HOME") .. "/.config/hypr/scripts/"
 local exec    = hl.dsp.exec_cmd
 
 local function key(k) return mod .. " + " .. k end
-local function qs(target, fn, arg)
-    return exec("qs ipc call " .. target .. " " .. fn .. (arg and (" " .. arg) or ""))
-end
+local function qs(name) return hl.dsp.global("quickshell:" .. name) end
 
 -- ── Basics ──
 hl.bind(key("Return"),            exec(term))
 hl.bind(key("q"),                 hl.dsp.window.close())
-hl.bind(key("d"),                 qs("launcher", "toggle"))
-hl.bind(key("x"),                 qs("power", "toggle"))
-hl.bind(key("v"),                 qs("launcher", "open", "clipboard"))
+hl.bind(key("d"),                 qs("launcher"))
+hl.bind(key("x"),                 qs("power"))
+hl.bind(key("v"),                 qs("clipboard"))
 hl.bind(key("CTRL + v"),          exec('cliphist wipe && notify-send -u low "Clipboard" "History cleared"'))
-hl.bind(key("c"),                 qs("launcher", "open", "calc"))
-hl.bind(key("period"),            qs("launcher", "open", "emoji"))
+hl.bind(key("c"),                 qs("calc"))
+hl.bind(key("period"),            qs("emoji"))
 hl.bind(key("SHIFT + r"),         hl.dsp.reload_config())
 hl.bind(key("SHIFT + Escape"),    exec("loginctl lock-session"))
 hl.bind(key("SHIFT + e"),         hl.dsp.exit()) -- log out (the power menu, Super+X, asks first)
@@ -128,7 +127,7 @@ hl.bind("SHIFT + Print", exec(scripts .. "record.sh"))
 
 -- ── Tools ──
 hl.bind(key("n"),               exec(scripts .. "nightlight.sh"))
-hl.bind(key("grave"),           qs("notifications", "history"))
-hl.bind(key("SHIFT + grave"),   qs("notifications", "clear"))
-hl.bind(key("SHIFT + n"),       qs("notifications", "dnd"))
+hl.bind(key("grave"),           qs("notif-history"))
+hl.bind(key("SHIFT + grave"),   qs("notif-clear"))
+hl.bind(key("SHIFT + n"),       qs("dnd"))
 hl.bind(key("SHIFT + a"),       exec(scripts .. "appearance.sh")) -- GTK theme, dark/light, icons, cursor, font

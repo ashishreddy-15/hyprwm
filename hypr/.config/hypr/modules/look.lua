@@ -2,7 +2,7 @@
 -- Windows are opaque with 8px corners and a soft shadow. The focused
 -- border runs from accent (top) to the photo's deep sky blue (bottom),
 -- like the sky above the horizon. Unfocused borders blend into the dark.
--- Motion is short and one-directional: no bounce, no wobble.
+-- Motion uses near-critically damped springs: physical, but no bounce or wobble.
 
 local P = require("modules.palette")
 
@@ -115,20 +115,39 @@ hl.config({
     animations = { enabled = true },
 })
 
--- ── Motion ───────────────────────────────────────────────────
--- speed is in tenths of a second: 2.5 = 250 ms
+-- ── Motion: Horizon springs ─────────────────────────────────
+-- Tuned from a frame-by-frame screen recording (60 Hz panel):
+--  * Light doesn't bounce: springs are damped close to critical (ζ ≈ 0.9),
+--    ζ = damping / (2·√(stiffness·mass)).
+--  * Nothing slides the full screen width. Any 1920 px move in ~0.3 s jumps
+--    200–400 px per frame, which reads as a jerk, not motion. Workspaces
+--    drift 20% and cross-fade instead (≤ ~50 px per frame), like light
+--    changing at dusk.
+--  * New windows fade in quickly so the bright horizon band doesn't flash
+--    through behind them. Closing things just fade.
+-- Quickshell's panels use the same physics (Theme.springs).
+--
+--   rise    k 600  ζ .90   new windows (popin), drop-down terminal
+--   settle  k 450  ζ .92   windows moving / resizing to make room
+--   glide   k 450  ζ .92   workspace drift (20% slide + fade, ~320 ms)
+hl.curve("rise",   { type = "spring", mass = 1, stiffness = 600, damping = 44.1 })
+hl.curve("settle", { type = "spring", mass = 1, stiffness = 450, damping = 39.0 })
+hl.curve("glide",  { type = "spring", mass = 1, stiffness = 450, damping = 39.0 })
+
+-- beziers for fades and exits; speed is in tenths of a second (1.2 = 120 ms)
 hl.curve("out",    { type = "bezier", points = { {0.22, 1}, {0.36, 1} } }) -- ease-out quint
-hl.curve("inout",  { type = "bezier", points = { {0.65, 0}, {0.35, 1} } })
 hl.curve("linear", { type = "bezier", points = { {0, 0},    {1, 1}    } })
 
-hl.animation({ leaf = "global",          enabled = true,  speed = 3,   bezier = "out" })
-hl.animation({ leaf = "windowsIn",       enabled = true,  speed = 2.5, bezier = "out",    style = "popin 94%" })
-hl.animation({ leaf = "windowsOut",      enabled = true,  speed = 1.6, bezier = "linear", style = "popin 94%" })
-hl.animation({ leaf = "windowsMove",     enabled = true,  speed = 2.5, bezier = "out" })
-hl.animation({ leaf = "fade",            enabled = true,  speed = 2,   bezier = "out" })
-hl.animation({ leaf = "border",          enabled = true,  speed = 2,   bezier = "out" })
-hl.animation({ leaf = "borderangle",     enabled = false })
-hl.animation({ leaf = "layersIn",        enabled = true,  speed = 2.2, bezier = "out",    style = "fade" })
-hl.animation({ leaf = "layersOut",       enabled = true,  speed = 1.5, bezier = "linear", style = "fade" })
-hl.animation({ leaf = "workspaces",      enabled = true,  speed = 2.5, bezier = "out",    style = "slide" })
-hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 2.5, bezier = "out",    style = "slidevert" })
+hl.animation({ leaf = "global",           enabled = true,  speed = 3,   bezier = "out" })
+hl.animation({ leaf = "windowsIn",        enabled = true,  speed = 4,   spring = "rise",   style = "popin 90%" })
+hl.animation({ leaf = "windowsOut",       enabled = true,  speed = 1.2, bezier = "linear", style = "popin 94%" })
+hl.animation({ leaf = "windowsMove",      enabled = true,  speed = 4,   spring = "settle" })
+hl.animation({ leaf = "fadeIn",           enabled = true,  speed = 0.8, bezier = "out" }) -- fast, so the wallpaper doesn't flash through
+hl.animation({ leaf = "fadeOut",          enabled = true,  speed = 1.2, bezier = "linear" })
+hl.animation({ leaf = "fadeSwitch",       enabled = true,  speed = 2,   bezier = "out" })
+hl.animation({ leaf = "border",           enabled = true,  speed = 2,   bezier = "out" })
+hl.animation({ leaf = "borderangle",      enabled = false })
+hl.animation({ leaf = "layersIn",         enabled = true,  speed = 2.2, bezier = "out",    style = "fade" })
+hl.animation({ leaf = "layersOut",        enabled = true,  speed = 1.5, bezier = "linear", style = "fade" })
+hl.animation({ leaf = "workspaces",       enabled = true,  speed = 4,   spring = "glide",  style = "slidefade 20%" })
+hl.animation({ leaf = "specialWorkspace", enabled = true,  speed = 4,   spring = "rise",   style = "slidefadevert 20%" })

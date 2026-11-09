@@ -33,13 +33,11 @@ Rectangle {
     border.color: critical ? Theme.alpha(Theme.red, 0.6) : Theme.border
     clip: true
 
-    // slide in from the right
-    property real slide: 24
-    transform: Translate { x: card.slide }
-    opacity: 0
-    Component.onCompleted: { slide = 0; opacity = 1 }
-    Behavior on slide { NumberAnimation { duration: Theme.normal; easing.type: Easing.OutQuint } }
-    Behavior on opacity { NumberAnimation { duration: Theme.normal } }
+    // settles in from the right on a spring
+    Spring { id: slideIn; preset: Theme.springs.settle; to: 0 }
+    transform: Translate { x: slideIn.value }
+    opacity: 1 - Math.min(1, slideIn.value / 10)
+    Component.onCompleted: slideIn.from(10)   // stays inside the window padding
 
     Row {
         id: content
