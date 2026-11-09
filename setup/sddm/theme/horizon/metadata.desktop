@@ -1,0 +1,11 @@
+[SddmGreeterTheme]
+Name=horizon
+Description=Login screen matching the Horizon Hyprland setup (and the Sway one): the dusk wallpaper, clock in the sky, password on the horizon line
+Type=sddm-theme
+Version=1.0
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=horizon
+Theme-API=2.0
+# SDDM 0.21 picks the Qt5 greeter unless this says 6
+QtVersion=6

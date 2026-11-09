@@ -125,6 +125,25 @@ network-manager-applet, blueman, qalculate (qalc), wtype, tuned-ppd.
 `quickshell/.config/quickshell/data/emoji.tsv` was generated once from
 rofimoji's emoji CSVs (Unicode CLDR names), so the launcher doesn't need rofimoji.
 
+## Login screen (SDDM)
+
+`setup/sddm.sh` installs the **horizon** SDDM theme: the dusk wallpaper, the
+clock in the sky, the password on the horizon line (red after a wrong
+password, CAPS LOCK in amber), and a bar-style island with the session
+(Hyprland / Sway, click to switch) and suspend / reboot / shut down. With two
+screens the form goes on the larger one; the other shows the wallpaper.
+
+```sh
+setup/sddm.sh --test        # preview in a window, nothing installed
+setup/sddm.sh               # install (sudo); shows at the next login screen
+setup/sddm.sh --uninstall   # back to the "mono" theme from ~/swaywm
+```
+
+It only adds `/etc/sddm.conf.d/20-horizon.conf` (theme switch) and the theme
+directory; the greeter's compositor setup (outputs, input, lid) stays with
+`~/swaywm/setup/sddm.sh`. If the greeter ever breaks: Ctrl+Alt+F3, log in,
+`sudo rm /etc/sddm.conf.d/20-horizon.conf && sudo systemctl restart sddm`.
+
 ## Checking changes
 
 ```sh
