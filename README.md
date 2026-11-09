@@ -5,6 +5,25 @@ Runs next to the Sway setup in `~/swaywm`: same palette (`~/swaywm/colors.md`,
 plus `sky #06587a` for gradients), same keybindings, separate daemons.
 Pick **Hyprland** or **Sway** on the login screen.
 
+![Empty workspace: the dusk wallpaper, a notification top right, and the launcher rising out of the bar island](docs/screenshot.png)
+
+Colour appears only where your attention is: the focused window's border
+fades from accent to the photo's deep blue, a thin "horizon line" marks the
+active workspace, the selected launcher row and the notification timer, and
+amber means a mode is on (REC, AWAKE, DND). Everything else stays grey.
+
+![Two tiled windows: nvim with the look config, kitty with the repo tree](docs/screenshot-work.png)
+
+| Keys | |
+| :--- | :--- |
+| `Super+D` | launcher (`=` calculator, `:` emoji) |
+| `Super+V` | clipboard history |
+| `Super+X` | power menu |
+| `Super+Shift+A` | appearance (GTK theme, icons, cursor, font) |
+| `Super+H/J/K/L` (+`Shift` move, +`Ctrl` resize) | focus, move and resize windows |
+| `Super+Shift+Return` | drop-down terminal |
+| click the clock | calendar |
+
 ## Packages (stow, target `~`)
 
 | Package      | Installs to             | What |
