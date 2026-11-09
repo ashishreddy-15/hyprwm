@@ -43,8 +43,9 @@ again closes it. Also a menu mode for scripts: `scripts/qs-dmenu`, a
 **Notifications.** Quickshell is the notification server in this session.
 Popups top right, newest first, with a shrinking horizon line for time left
 (hover pauses it); critical ones stay and turn red. Same-tag notifications
-(brightness, recording, night light) replace each other. History, clear all
-and do-not-disturb are on keys.
+(brightness, recording, night light) replace each other. `` Super+` `` opens
+the notification center: everything not yet dismissed, grouped by app, with
+per-item and per-app dismiss, clear all, and a do-not-disturb switch.
 
 **Workspace overview** (`Super+O`). The focused screen's workspaces as small
 live screens along the photo's horizon band, over a dimmed, blurred copy of
@@ -95,7 +96,7 @@ The values were tuned from frame-by-frame screen recordings (wf-recorder at
 | `Super+G` · `Super+S` | window group (tabs) · next tab |
 | `Super+Shift+B` · `Super+Shift+V` · `Super+T` | next window opens right · below · toggle split |
 | `Super+-` · `Super+Shift+-` | scratchpad show · send |
-| `` Super+` `` · `` Super+Shift+` `` · `Super+Shift+N` | last notification · clear all · do not disturb |
+| `` Super+` `` · `` Super+Shift+` `` · `Super+Shift+N` | notification center · clear all · do not disturb |
 | `Super+N` · `Super+Shift+A` | night light · appearance (GTK theme, icons, cursor, font) |
 | `Super+[` · `Super+]` | brightness (laptop panel or DDC monitor, whichever is focused) |
 | `Print` · `Alt+Print` · `Ctrl+Print` · `Shift+Print` | screenshot screen · window · area · record area |

@@ -41,8 +41,8 @@ hl.window_rule({
 
 -- ── Quickshell panels: translucent with blur ──
 -- Namespaces are set in ~/.config/quickshell (horizon-*)
-hl.layer_rule({ name = "qs-blur",       match = { namespace = "^horizon-(bar|launcher|notifications|osd|power|calendar|powerpanel)$" }, blur = true, ignore_alpha = 0.2 })
+hl.layer_rule({ name = "qs-blur",       match = { namespace = "^horizon-(bar|launcher|notifications|osd|power|calendar|powerpanel|notifcenter)$" }, blur = true, ignore_alpha = 0.2 })
 -- Quickshell animates its own panels (springs); a second compositor fade on
 -- top looks muddy, so Hyprland leaves these layers alone.
-hl.layer_rule({ name = "qs-no-anim",    match = { namespace = "^horizon-(launcher|power|calendar|osd|notifications|powerpanel|overview)$" }, no_anim = true })
+hl.layer_rule({ name = "qs-no-anim",    match = { namespace = "^horizon-(launcher|power|calendar|osd|notifications|powerpanel|overview|notifcenter)$" }, no_anim = true })
 hl.layer_rule({ name = "qs-wallpaper",  match = { namespace = "^horizon-wallpaper$" }, no_anim = true })

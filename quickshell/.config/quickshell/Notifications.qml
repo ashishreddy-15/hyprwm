@@ -9,7 +9,8 @@ import Quickshell.Wayland
 // Popups appear top-right on the focused screen, newest on top, at most 5.
 // Everything stays in history until dismissed or cleared.
 //
-//   qs ipc call notifications history   re-show the latest closed one (Super+`)
+//   qs ipc call notifications center    notification center: all of them (Super+`)
+//   qs ipc call notifications history   re-show the latest closed one
 //   qs ipc call notifications clear     dismiss everything             (Super+Shift+`)
 //   qs ipc call notifications dnd       do not disturb on/off          (Super+Shift+N)
 //
@@ -20,6 +21,8 @@ Scope {
     id: root
 
     property var popups: []
+    property var arrived: ({})          // notification id → arrival time (ms), for "5 min ago"
+    readonly property bool centerOpen: center.open
 
     function tagOf(n) {
         const h = n.hints || {};
@@ -31,6 +34,10 @@ Scope {
     function historyPop() {
         const list = Array.from(server.trackedNotifications.values).filter(n => popups.indexOf(n) < 0);
         if (list.length > 0) show(list[list.length - 1]);
+    }
+    function toggleCenter() {
+        center.open = !center.open;
+        if (center.open) popups = [];   // the center shows them; don't overlap
     }
     function clearAll() {
         for (const n of Array.from(server.trackedNotifications.values)) n.dismiss();
@@ -48,12 +55,14 @@ Scope {
 
         onNotification: n => {
             n.tracked = true;
+            const a = Object.assign({}, root.arrived); a[n.id] = Date.now(); root.arrived = a;
             const tag = root.tagOf(n);
             if (tag !== "") {
                 for (const old of Array.from(server.trackedNotifications.values))
                     if (old !== n && root.tagOf(old) === tag) old.dismiss();
             }
             if (Status.dnd && n.urgency !== NotificationUrgency.Critical) return;
+            if (center.open) return;    // it appears in the open center instead
             root.show(n);
         }
     }
@@ -61,10 +70,14 @@ Scope {
     IpcHandler {
         target: "notifications"
 
+        function center(): void { root.toggleCenter() }
         function history(): void { root.historyPop() }
         function clear(): void { root.clearAll() }
         function dnd(): void { Status.toggleDnd() }
     }
+
+    readonly property var notifServer: server   // passed on under another name (see below)
+    NotificationCenter { id: center; server: root.notifServer; owner: root }
 
     PanelWindow {
         id: win

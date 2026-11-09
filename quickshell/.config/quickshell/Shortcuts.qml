@@ -18,7 +18,7 @@ Scope {
     GlobalShortcut { name: "calc";          description: "Launcher: calculator";       onPressed: root.launcher.toggleMode("calc") }
     GlobalShortcut { name: "emoji";         description: "Launcher: emoji";            onPressed: root.launcher.toggleMode("emoji") }
     GlobalShortcut { name: "power";         description: "Power menu";                 onPressed: root.power.toggle() }
-    GlobalShortcut { name: "notif-history"; description: "Show the last notification"; onPressed: root.notifications.historyPop() }
+    GlobalShortcut { name: "notif-history"; description: "Notification center"; onPressed: root.notifications.toggleCenter() }
     GlobalShortcut { name: "notif-clear";   description: "Dismiss all notifications";  onPressed: root.notifications.clearAll() }
     GlobalShortcut { name: "overview";      description: "Workspace overview";        onPressed: root.overview.toggle() }
     GlobalShortcut { name: "bar";           description: "Show / hide the bar";       onPressed: Status.barShown = !Status.barShown }
