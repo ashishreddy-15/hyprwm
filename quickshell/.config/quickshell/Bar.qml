@@ -141,8 +141,18 @@ Variants {
                 }
 
                 BarMeter {
+                    id: batteryMeter
                     anchors.verticalCenter: parent.verticalCenter
                     visible: bar.battery !== null && bar.battery.isLaptopBattery
+                    // charging: soft static glow; plug in / unplug / full: one sweep of light
+                    readonly property bool charging: bar.battery !== null && bar.battery.state === UPowerDeviceState.Charging
+                    readonly property bool full: bar.battery !== null && bar.battery.state === UPowerDeviceState.FullyCharged
+                    lit: charging
+                    onFullChanged: if (full) sweep(false)
+                    Connections {
+                        target: UPower
+                        function onOnBatteryChanged() { batteryMeter.sweep(UPower.onBattery) }
+                    }
                     readonly property real pct: !bar.battery ? 0
                         : (bar.battery.percentage > 1 ? bar.battery.percentage / 100 : bar.battery.percentage)
                     readonly property int whole: Math.round(pct * 100)

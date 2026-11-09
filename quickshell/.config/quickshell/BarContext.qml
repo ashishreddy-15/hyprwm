@@ -6,7 +6,7 @@ import Quickshell.Hyprland
 // empty and is never crowded:
 //   something playing →  ▮▮▮ Title · Artist        (BarMedia)
 //   otherwise         →  App  window title          (focused window on this screen)
-//   empty workspace   →  nothing
+//   empty workspace   →  cpu temp · memory · pending updates, dim (BarSystemGlance.qml)
 // Never wider than `maxWidth`; long text ends in "…". Cross-fades between modes.
 Item {
     id: root
@@ -19,6 +19,9 @@ Item {
     readonly property var win: {
         const t = Hyprland.activeToplevel;
         if (!t || !monitor || !t.monitor || t.monitor.name !== monitor.name) return null;
+        // ...and on the workspace this screen is showing (an empty workspace
+        // can't take focus, so focus stays with a window on another one)
+        if (!t.workspace || !monitor.activeWorkspace || t.workspace.id !== monitor.activeWorkspace.id) return null;
         if (t.workspace && t.workspace.name && t.workspace.name.startsWith("special:")) return null;
         return t;
     }
@@ -42,9 +45,13 @@ Item {
 
     readonly property bool showMedia: media.player !== null
     readonly property bool showWindow: !showMedia && appName !== ""
+    readonly property bool emptyWorkspace: !!monitor && !!monitor.activeWorkspace
+        && monitor.activeWorkspace.toplevels.values.length === 0
+    readonly property bool showGlance: !showMedia && !showWindow && emptyWorkspace
 
     implicitHeight: fontSize * 1.4
-    implicitWidth: Math.min(maxWidth, showMedia ? media.implicitWidth : showWindow ? windowRow.implicitWidth : 0)
+    implicitWidth: Math.min(maxWidth, showMedia ? media.implicitWidth : showWindow ? windowRow.implicitWidth
+                                   : showGlance ? glance.implicitWidth : 0)
     width: implicitWidth
     clip: true
 
@@ -54,6 +61,16 @@ Item {
         fontSize: root.fontSize
         width: Math.min(implicitWidth, root.maxWidth)
         opacity: root.showMedia ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: Theme.fast } }
+    }
+
+    BarSystemGlance {
+        id: glance
+        anchors.verticalCenter: parent.verticalCenter
+        fontSize: root.fontSize
+        active: root.showGlance
+        opacity: root.showGlance ? 1 : 0
+        visible: opacity > 0
         Behavior on opacity { NumberAnimation { duration: Theme.fast } }
     }
 

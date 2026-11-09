@@ -120,16 +120,23 @@ Scope {
                     color: Theme.border
                     opacity: root.muted ? 0.5 : 1
 
-                    Rectangle {
+                    // the fill reveals a gradient as wide as the track: the
+                    // colour says the level (deep sky low, bright accent high)
+                    Item {
                         id: fill
                         height: parent.height
-                        radius: 1
                         Spring { id: fillW; preset: Theme.springs.settle; to: Math.max(0, Math.min(1, root.value / 100)) * track.width }
                         width: fillW.value
-                        gradient: Gradient {
-                            orientation: Gradient.Horizontal
-                            GradientStop { position: 0.0; color: Theme.sky }
-                            GradientStop { position: 1.0; color: Theme.accent }
+                        clip: true
+                        Rectangle {
+                            width: track.width
+                            height: parent.height
+                            radius: 1
+                            gradient: Gradient {
+                                orientation: Gradient.Horizontal
+                                GradientStop { position: 0.0; color: Theme.sky }
+                                GradientStop { position: 1.0; color: Theme.accent }
+                            }
                         }
                     }
 

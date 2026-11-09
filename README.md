@@ -21,11 +21,16 @@ stays grey, including app icons until you select them.
 - Left: that screen's workspaces, with a dot per window and the horizon line
   under the active one. A soft glow on the island's top edge drifts after it.
   Next to them, whatever is playing, or else the focused window as
-  `App  title`, capped so it never reaches the clock.
+  `App  title`, capped so it never reaches the clock. On an empty workspace,
+  a quiet system glance: `cpu 56°  mem 5.2 GB  updates 13` (temperature turns
+  amber from 85°; updates come from dnf's cache, click to upgrade in kitty).
 - Centre: date and time. Click for a month calendar.
 - Right: modes only while they're on (REC, AWAKE, DND, PERF in amber, SAVER
-  in grey), volume and battery meters, and a `···` tray drawer. Scroll the
-  volume to change it, click it to mute. The battery reads BAT, CHR or AC.
+  in grey), volume and battery meters, and a `···` tray drawer. The meters'
+  sky-to-accent gradient spans the whole track, so the colour itself shows
+  the level. Scroll the volume to change it, click it to mute. The battery
+  reads BAT, CHR or AC, glows softly while charging, and a single sweep of
+  light runs along it when the charger is plugged in or out.
 - Click the battery for the **power panel**: power profile (saver, balanced,
   performance, via tuned-ppd), a keep-awake switch, and time left and power draw.
 
