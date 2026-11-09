@@ -8,7 +8,7 @@ import Quickshell.Wayland
 // Glow island: one centred island at the bottom of every screen.
 //   left:   this screen's workspaces · media while playing, else the focused window
 //   centre: date and time (click: calendar)
-//   right:  modes (REC, AWAKE, DND, in amber, only while on) · VOL · BAT · tray
+//   right:  modes (REC, AWAKE, DND, PERF in amber; SAVER grey; only while on) · VOL · BAT (click: power panel) · tray
 // A soft glow on the island's top edge sits above the active workspace;
 // it dims on the screen that doesn't have focus.
 Variants {
@@ -37,6 +37,7 @@ Variants {
         color: "transparent"
 
         Calendar { id: calendar; bar: bar }
+        PowerPanel { id: powerPanel; bar: bar }   // click the battery meter
 
         PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
         readonly property var sink: Pipewire.defaultAudioSink
@@ -121,6 +122,9 @@ Variants {
                 ModeLabel { size: bar.fontSize; text: "REC";   shown: Status.recording }
                 ModeLabel { size: bar.fontSize; text: "AWAKE"; shown: Status.keepAwake; onClicked: Status.toggleKeepAwake() }
                 ModeLabel { size: bar.fontSize; text: "DND";   shown: Status.dnd;       onClicked: Status.toggleDnd() }
+                // power profile: Balanced is normal and shows nothing (as in the Sway bar)
+                ModeLabel { size: bar.fontSize; text: "PERF";  shown: PowerProfiles.profile === PowerProfile.Performance; onClicked: powerPanel.open = !powerPanel.open }
+                ModeLabel { size: bar.fontSize; text: "SAVER"; shown: PowerProfiles.profile === PowerProfile.PowerSaver; tone: Theme.muted; onClicked: powerPanel.open = !powerPanel.open }
 
                 BarMeter {
                     anchors.verticalCenter: parent.verticalCenter
@@ -143,7 +147,9 @@ Variants {
                         : (bar.battery.percentage > 1 ? bar.battery.percentage / 100 : bar.battery.percentage)
                     readonly property int whole: Math.round(pct * 100)
                     fontSize: bar.fontSize
-                    label: UPower.onBattery ? "BAT" : "AC"
+                    // BAT on battery, CHR charging, AC plugged in but holding (e.g. at a charge limit)
+                    label: UPower.onBattery ? "BAT" : bar.battery && bar.battery.state === UPowerDeviceState.Charging ? "CHR" : "AC"
+                    onClicked: powerPanel.open = !powerPanel.open   // power profile + keep awake
                     fraction: pct
                     value: whole
                     // same thresholds as the Sway bar: warning 25, critical 15 (on battery only)
@@ -221,12 +227,13 @@ Variants {
     component ModeLabel: Text {
         property bool shown: false
         property int size: 13
+        property color tone: Theme.amber
         signal clicked()
         visible: shown
         anchors.verticalCenter: parent ? parent.verticalCenter : undefined
         font.family: Theme.font
         font.pixelSize: size
-        color: Theme.amber
+        color: tone
         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: parent.clicked() }
     }
 }
