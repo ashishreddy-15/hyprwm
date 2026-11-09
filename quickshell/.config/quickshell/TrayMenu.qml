@@ -42,7 +42,7 @@ PopupWindow {
         width: parent.width
         implicitHeight: body.implicitHeight + 12
         radius: 8
-        color: Theme.alpha(Theme.surface, 0.97)
+        color: Theme.alpha(Theme.surface, Theme.popupAlpha)
         border.color: Theme.border
         border.width: 1
 

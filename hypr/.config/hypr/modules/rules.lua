@@ -34,7 +34,8 @@ hl.window_rule({ name = "pip", match = { title = "^Picture.in.[Pp]icture$" }, fl
 hl.window_rule({
     name  = "dropdown",
     match = { class = "^dropdown$" },
-    float = true, size = "60% 60%", center = true,
+    -- sizes are expressions in the Lua config ("80% 75%" is silently ignored)
+    float = true, size = "monitor_w*0.8 monitor_h*0.75", center = true,
     workspace = "special:dropdown",
 })
 

@@ -28,7 +28,7 @@ Rectangle {
     width: parent ? parent.width : 380
     implicitHeight: content.implicitHeight + 26
     radius: 8
-    color: Theme.alpha(Theme.surface, 0.95)
+    color: Theme.alpha(Theme.surface, Theme.popupAlpha)
     border.width: 1
     border.color: critical ? Theme.alpha(Theme.red, 0.6) : Theme.border
     clip: true

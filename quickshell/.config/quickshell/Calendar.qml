@@ -77,7 +77,7 @@ PanelWindow {
         width: parent.width
         implicitHeight: body.implicitHeight + 28
         radius: 10
-        color: Theme.alpha(Theme.surface, 0.95)
+        color: Theme.alpha(Theme.surface, Theme.popupAlpha)
         border.color: Theme.border
         border.width: 1
 

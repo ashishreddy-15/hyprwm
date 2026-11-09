@@ -21,8 +21,13 @@ Singleton {
     readonly property color amber:   "#db892d"
     readonly property color red:     "#e05555"
 
-    // Panels are slightly translucent (Hyprland blurs behind them)
+    // Panels are translucent; Hyprland blurs what's behind them (rules.lua).
+    // panelAlpha: bar and OSD. popupAlpha: launcher, menus, notifications.
+    // Lower values were compared (with Hyprland's frost/acrylic/haze blur):
+    // the panels sit on the photo's near-black ground and sky, so stronger
+    // translucency changed nothing visible, and acrylic dropped frames.
     readonly property real panelAlpha: 0.88
+    readonly property real popupAlpha: 0.95
 
     readonly property string font: "Maple Mono NF"
 
