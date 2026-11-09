@@ -19,5 +19,6 @@ Scope {
     GlobalShortcut { name: "power";         description: "Power menu";                 onPressed: root.power.toggle() }
     GlobalShortcut { name: "notif-history"; description: "Show the last notification"; onPressed: root.notifications.historyPop() }
     GlobalShortcut { name: "notif-clear";   description: "Dismiss all notifications";  onPressed: root.notifications.clearAll() }
+    GlobalShortcut { name: "bar";           description: "Show / hide the bar";       onPressed: Status.barShown = !Status.barShown }
     GlobalShortcut { name: "dnd";           description: "Do not disturb on/off";      onPressed: Status.toggleDnd() }
 }

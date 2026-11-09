@@ -1,8 +1,10 @@
 -- ── Key bindings ─────────────────────────────────────────────
 -- Ported from ~/swaywm/sway/.config/sway/config (+ config.d).
 -- Differences from Sway:
---   Super+W/S    tabbed/stacking → window group / next tab in the group
---   Super+B, Super+Shift+V  split → choose where the next window opens
+--   Super+W/S    tabbed/stacking → Super+G window group, Super+S next tab
+--                (Super+W opens Brave Origin, Super+E Nautilus, Super+B toggles the bar)
+--   Super+Shift+B / Super+Shift+V  split → choose where the next window opens
+--   Super+E      toggle split → Super+T
 --   Super+minus  scratchpad → special workspace "scratch"
 --   Super+A      focus parent: dropped (Hyprland has no container tree)
 --   Super+R      resize mode → Super+Ctrl+HJKL resizes directly
@@ -19,6 +21,9 @@ local function qs(name) return hl.dsp.global("quickshell:" .. name) end
 
 -- ── Basics ──
 hl.bind(key("Return"),            exec(term))
+hl.bind(key("w"),                 exec("brave-origin"))
+hl.bind(key("e"),                 exec("nautilus -w"))     -- -w: always a new window
+hl.bind(key("b"),                 qs("bar"))               -- show / hide the bar
 hl.bind(key("q"),                 hl.dsp.window.close())
 hl.bind(key("d"),                 qs("launcher"))
 hl.bind(key("x"),                 qs("power"))
@@ -67,10 +72,10 @@ hl.bind(key("Tab"),         hl.dsp.focus({ monitor = "+1" }))
 hl.bind(key("SHIFT + Tab"), hl.dsp.workspace.move({ monitor = "+1" }))
 
 -- ── Layout ──
-hl.bind(key("b"),           hl.dsp.layout("preselect r")) -- next window opens to the right
+hl.bind(key("SHIFT + b"),   hl.dsp.layout("preselect r")) -- next window opens to the right
 hl.bind(key("SHIFT + v"),   hl.dsp.layout("preselect d")) -- next window opens below
-hl.bind(key("e"),           hl.dsp.layout("togglesplit"))
-hl.bind(key("w"),           hl.dsp.group.toggle())        -- tabs (window group)
+hl.bind(key("t"),           hl.dsp.layout("togglesplit"))
+hl.bind(key("g"),           hl.dsp.group.toggle())        -- tabs (window group)
 hl.bind(key("s"),           hl.dsp.group.next())          -- next tab in the group
 hl.bind(key("f"),           hl.dsp.window.fullscreen({ mode = "fullscreen" }))
 hl.bind(key("SHIFT + space"), hl.dsp.window.float({ action = "toggle" }))

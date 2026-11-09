@@ -13,6 +13,7 @@ Singleton {
     property bool keepAwake: false   // hypridle without timeouts (keep-awake.sh)
     property bool nightLight: false  // hyprsunset running (Super+N)
     property bool dnd: false         // notifications paused (Super+Shift+N)
+    property bool barShown: true     // Super+B hides / shows the bar on every screen
 
     // OSD requests: Osd.qml listens to these
     signal level(string label, int value, bool muted)

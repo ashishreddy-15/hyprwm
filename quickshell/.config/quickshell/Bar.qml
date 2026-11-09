@@ -33,8 +33,13 @@ Variants {
         margins.bottom: 4
         implicitWidth: Math.min(Math.round(modelData.width * 0.5), 1040)
         implicitHeight: islandHeight + glowRoom
-        exclusiveZone: islandHeight
+        // Super+B: the island slides down out of view and its space is given
+        // back to windows; clicks pass through while hidden
+        exclusiveZone: Status.barShown ? islandHeight : 0
+        mask: Region { item: Status.barShown ? island : null }
         color: "transparent"
+        Spring { id: hideY; preset: Theme.springs.rise; to: Status.barShown ? 0 : bar.islandHeight + bar.glowRoom + 6 }
+        readonly property real shownness: 1 - hideY.value / (islandHeight + glowRoom + 6)
 
         Calendar { id: calendar; bar: bar }
         PowerPanel { id: powerPanel; bar: bar }   // click the battery meter
@@ -45,6 +50,8 @@ Variants {
 
         Rectangle {
             id: island
+            transform: Translate { y: hideY.value }
+            opacity: bar.shownness
             anchors.fill: parent
             anchors.topMargin: bar.glowRoom
             radius: 8
@@ -181,12 +188,13 @@ Variants {
         // so the glow stays centred over workspace 1 without spilling past the corner.
         Item {
             id: glowClip
+            transform: Translate { y: hideY.value }
             x: island.x + island.radius
             width: island.width - 2 * island.radius
             y: bar.glowRoom - 2
             height: 5
             clip: true
-            opacity: bar.monitor && bar.monitor.focused ? 1 : 0.4
+            opacity: (bar.monitor && bar.monitor.focused ? 1 : 0.4) * bar.shownness
             Behavior on opacity { NumberAnimation { duration: Theme.normal } }
 
         Item {
