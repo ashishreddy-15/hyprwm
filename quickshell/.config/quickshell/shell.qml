@@ -15,7 +15,8 @@ ShellRoot {
     // not always picked up by Quickshell's file watcher, so reload explicitly.
     IpcHandler {
         target: "shell"
-        function reload(): void { Quickshell.reload(true) }
+        // never while locked: a reload is the risky moment for the lock screen
+        function reload(): void { if (!lock.locked) Quickshell.reload(true) }
     }
 
     Wallpaper {}
@@ -26,5 +27,6 @@ ShellRoot {
     PowerMenu { id: power }
     Overview { id: overview }
     Ambient {}
+    Lock { id: lock }
     Shortcuts { launcher: launcher; power: power; notifications: notifications; overview: overview }
 }

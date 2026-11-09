@@ -57,10 +57,20 @@ wallpaper with the clock large in the sky, as on the lock screen. Any key or
 mouse movement brings the desktop back. The lock screen still comes at five
 minutes, and nothing changes while keep-awake is on.
 
+**Lock screen** (`Super+Shift+Escape`, and after 5 idle minutes or before
+sleep). Quickshell's own, in the same style: the clock in the sky above the
+mountain, the password as dots over the horizon line (red after a wrong one),
+battery at the bottom. `scripts/lock.sh` locks and returns only once the lock
+is confirmed; if Quickshell can't lock, **hyprlock locks instead**
+(`hypr/hyprlock.conf` is that fallback's look). If Quickshell crashes while
+locked, Hyprland stays locked, the restart loop brings it back and it locks
+again; config reloads are refused while locked. If you're ever stuck on a red
+screen: Ctrl+Alt+F3, log in, then
+`hyprctl --instance 0 dispatch 'hl.dsp.exec_cmd("hyprlock")'`.
+
 **Also:** volume and brightness OSD above the bar, power menu that asks before
 logging out, rebooting or shutting down, tray menus for nm-applet and
-blueman drawn in the same style (not Qt's default), a lock screen with the
-clock in the sky above the mountain (hyprlock), and Papirus-Dark icons for
+blueman drawn in the same style (not Qt's default), and Papirus-Dark icons for
 Quickshell only.
 
 ## Motion
