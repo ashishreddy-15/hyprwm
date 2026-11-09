@@ -136,4 +136,5 @@ hl.bind(key("n"),               exec(scripts .. "nightlight.sh"))
 hl.bind(key("grave"),           qs("notif-history"))
 hl.bind(key("SHIFT + grave"),   qs("notif-clear"))
 hl.bind(key("SHIFT + n"),       qs("dnd"))
+hl.bind(key("SHIFT + f"),       qs("focus"))              -- focus mode: dnd + no bar + dim inactive windows
 hl.bind(key("SHIFT + a"),       exec(scripts .. "appearance.sh")) -- GTK theme, dark/light, icons, cursor, font

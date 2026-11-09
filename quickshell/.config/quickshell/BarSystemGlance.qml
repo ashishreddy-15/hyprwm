@@ -1,24 +1,22 @@
 import QtQuick
 import Quickshell
-import Quickshell.Io
 
-// Quiet system glance for an empty workspace:   cpu 56°   mem 5.4 GB   updates 13
-//   cpu      package temperature (x86_pkg_temp); amber from 85°, red from 95°
-//   mem      used memory (total − available)
-//   updates  from `dnf check-update -C`: the cache dnf-makecache.timer keeps
-//            fresh, so no sudo and no network. Click: kitty with `sudo dnf upgrade`.
-// Temperature and memory every 10 s, updates at most every 30 min, and only
-// while `active` (shown), so it costs nothing the rest of the time.
+// Quiet system glance, shown where the bar has no window title to show (an
+// empty workspace, or a screen that doesn't have focus):
+//   cpu 56°   mem 5.2 GB   updates 13
+//   cpu      package temperature; amber from 85°, red from 95°
+//   mem      memory in use
+//   updates  pending updates; click: kitty with `sudo dnf upgrade`
+// The values come from SystemStats (shared, read only while a glance shows).
 Item {
     id: glance
 
     property int fontSize: 13
     property bool active: false
 
-    property int temp: -1              // °C
-    property real memGiB: -1
-    property int updates: -1           // -1 = not checked yet
-    property real _lastUpdateCheck: 0  // ms since epoch
+    readonly property int temp: SystemStats.temp
+    readonly property real memGiB: SystemStats.memGiB
+    readonly property int updates: SystemStats.updates
 
     implicitWidth: line.implicitWidth
     implicitHeight: fontSize * 1.4
@@ -28,42 +26,15 @@ Item {
         : memGiB.toFixed(1) + " GB"
     readonly property color tempColor: temp >= 95 ? Theme.red : temp >= 85 ? Theme.amber : Theme.muted
 
-    // temperature + memory
-    Process {
-        id: readSys
-        command: ["sh", "-c",
-            "for z in /sys/class/thermal/thermal_zone*; do [ \"$(cat $z/type)\" = x86_pkg_temp ] && { cat $z/temp; break; }; done; " +
-            "grep -E '^(MemTotal|MemAvailable):' /proc/meminfo"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const lines = text.trim().split("\n");
-                const t = Number(lines[0]);
-                glance.temp = isNaN(t) ? -1 : Math.round(t / 1000);
-                const kb = name => Number((lines.find(l => l.startsWith(name)) || "x 0").split(/\s+/)[1]);
-                const used = kb("MemTotal:") - kb("MemAvailable:");
-                if (used > 0) glance.memGiB = used / 1048576;
-            }
-        }
+    // tell SystemStats while this glance is showing, so it only reads then
+    property bool _counted: false
+    function sync() {
+        if (active && !_counted) { SystemStats.watchers += 1; _counted = true; }
+        else if (!active && _counted) { SystemStats.watchers -= 1; _counted = false; }
     }
-
-    // pending updates (cached metadata only)
-    Process {
-        id: readUpdates
-        command: ["sh", "-c", "dnf check-update -C -q 2>/dev/null | grep -cE '^[^[:space:]]+\\.[^[:space:]]+[[:space:]]+[^[:space:]]+[[:space:]]+[^[:space:]]+'"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const n = parseInt(text.trim());
-                glance.updates = isNaN(n) ? 0 : n;
-                glance._lastUpdateCheck = Date.now();
-            }
-        }
-    }
-
-    function refresh() {
-        if (!readSys.running) readSys.running = true;
-        if (!readUpdates.running && Date.now() - _lastUpdateCheck > 30 * 60 * 1000) readUpdates.running = true;
-    }
-    Timer { interval: 10000; running: glance.active; repeat: true; triggeredOnStart: true; onTriggered: glance.refresh() }
+    onActiveChanged: sync()
+    Component.onCompleted: sync()
+    Component.onDestruction: if (_counted) SystemStats.watchers -= 1
 
     // One line at the bar's normal size, two tones like the window title
     // (labels dim, values grey); plain spacing instead of separators.

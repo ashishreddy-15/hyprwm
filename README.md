@@ -20,9 +20,9 @@ stays grey, including app icons until you select them.
 **Bar (glow island).** One island per screen, centred at the bottom.
 - Left: that screen's workspaces, with a dot per window and the horizon line
   under the active one. A soft glow on the island's top edge drifts after it.
-  Next to them, whatever is playing, or else the focused window as
+  Next to them, the focused window as
   `App  title`, capped so it never reaches the clock. On an empty workspace,
-  a quiet system glance: `cpu 56°  mem 5.2 GB  updates 13` (temperature turns
+  or on the screen that doesn't have focus, a quiet system glance: `cpu 56°  mem 5.2 GB  updates 13` (temperature turns
   amber from 85°; updates come from dnf's cache, click to upgrade in kitty).
 - Centre: date and time. Click for a month calendar.
 - Right: modes only while they're on (REC, AWAKE, DND, PERF in amber, SAVER
@@ -84,6 +84,7 @@ The values were tuned from frame-by-frame screen recordings (wf-recorder at
 | `Super+Return` · `Super+Shift+Return` | kitty · drop-down kitty |
 | `Super+W` · `Super+E` | Brave Origin · Nautilus (new window) |
 | `Super+B` | show / hide the bar |
+| `Super+Shift+F` | focus mode: do not disturb, bar hidden, windows without focus dimmed; again to restore exactly what was on before |
 | `Super+O` | workspace overview: live previews; arrows / 1…0 / click to go, drag a window onto another workspace |
 | `Super+D` · `Super+C` · `Super+.` · `Super+V` | launcher: apps · calculator · emoji · clipboard |
 | `Super+X` · `Super+Shift+E` | power menu · log out |

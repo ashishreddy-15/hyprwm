@@ -4,9 +4,9 @@ import Quickshell.Hyprland
 
 // The slot after the workspace numbers, so the left of the island isn't
 // empty and is never crowded:
-//   something playing →  ▮▮▮ Title · Artist        (BarMedia)
-//   otherwise         →  App  window title          (focused window on this screen)
-//   empty workspace   →  cpu temp · memory · pending updates, dim (BarSystemGlance.qml)
+//   a window is focused →  App  window title        (the focused window, on this screen)
+//   otherwise           →  cpu temp · memory · pending updates, dim (BarSystemGlance.qml):
+//                          an empty workspace, or the screen that doesn't have focus
 // Never wider than `maxWidth`; long text ends in "…". Cross-fades between modes.
 Item {
     id: root
@@ -43,26 +43,16 @@ Item {
         return t === appName ? "" : t;
     }
 
-    readonly property bool showMedia: media.player !== null
-    readonly property bool showWindow: !showMedia && appName !== ""
-    readonly property bool emptyWorkspace: !!monitor && !!monitor.activeWorkspace
-        && monitor.activeWorkspace.toplevels.values.length === 0
-    readonly property bool showGlance: !showMedia && !showWindow && emptyWorkspace
+    readonly property bool showWindow: appName !== ""
+    // no window title to show (empty workspace, or this screen isn't the focused
+    // one): the system glance, so the bar's left is never blank
+    readonly property bool showGlance: !showWindow
 
     implicitHeight: fontSize * 1.4
-    implicitWidth: Math.min(maxWidth, showMedia ? media.implicitWidth : showWindow ? windowRow.implicitWidth
+    implicitWidth: Math.min(maxWidth, showWindow ? windowRow.implicitWidth
                                    : showGlance ? glance.implicitWidth : 0)
     width: implicitWidth
     clip: true
-
-    BarMedia {
-        id: media
-        anchors.verticalCenter: parent.verticalCenter
-        fontSize: root.fontSize
-        width: Math.min(implicitWidth, root.maxWidth)
-        opacity: root.showMedia ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: Theme.fast } }
-    }
 
     BarSystemGlance {
         id: glance

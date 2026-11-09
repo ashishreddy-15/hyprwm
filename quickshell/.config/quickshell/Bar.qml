@@ -6,7 +6,7 @@ import Quickshell.Services.UPower
 import Quickshell.Wayland
 
 // Glow island: one centred island at the bottom of every screen.
-//   left:   this screen's workspaces · media while playing, else the focused window
+//   left:   this screen's workspaces · the focused window, or a system glance
 //   centre: date and time (click: calendar)
 //   right:  modes (REC, AWAKE, DND, PERF in amber; SAVER grey; only while on) · VOL · BAT (click: power panel) · tray
 // A soft glow on the island's top edge sits above the active workspace;
@@ -61,7 +61,7 @@ Variants {
 
             readonly property int pad: Math.round(bar.fontSize * 0.8)
 
-            // ── Left: workspaces + media ──
+            // ── Left: workspaces + context ──
             Row {
                 id: left
                 anchors.left: parent.left
@@ -77,7 +77,7 @@ Variants {
                     height: parent.height
                 }
 
-                // media while playing, else the focused window (BarContext.qml);
+                // the focused window, or a system glance (BarContext.qml);
                 // capped, and always a clear gap before the clock
                 BarContext {
                     anchors.verticalCenter: parent.verticalCenter

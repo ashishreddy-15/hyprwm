@@ -14,6 +14,7 @@ Singleton {
     property bool nightLight: false  // hyprsunset running (Super+N)
     property bool dnd: false         // notifications paused (Super+Shift+N)
     property bool barShown: true     // Super+B hides / shows the bar on every screen
+    property bool focusMode: false   // Super+Shift+F: dnd + hidden bar + dimmed inactive windows
 
     // OSD requests: Osd.qml listens to these
     signal level(string label, int value, bool muted)
@@ -22,6 +23,23 @@ Singleton {
     function toggleKeepAwake() {
         Quickshell.execDetached([Theme.scripts + "keep-awake.sh", "toggle"]);
         repoll.restart();
+    }
+
+    // Focus mode: no notifications, no bar, and windows without focus dimmed.
+    // Remembers what was on before and restores exactly that on exit.
+    property bool _prevDnd: false
+    property bool _prevBar: true
+    function toggleFocus() {
+        if (!focusMode) {
+            _prevDnd = dnd; _prevBar = barShown;
+            dnd = true; barShown = false; focusMode = true;
+            Quickshell.execDetached(["hyprctl", "eval", "hl.config({ decoration = { dim_inactive = true, dim_strength = 0.3 } })"]);
+            message("FOCUS  ON");
+        } else {
+            dnd = _prevDnd; barShown = _prevBar; focusMode = false;
+            Quickshell.execDetached(["hyprctl", "eval", "hl.config({ decoration = { dim_inactive = false } })"]);
+            message("FOCUS  OFF");
+        }
     }
 
     function toggleDnd() {
