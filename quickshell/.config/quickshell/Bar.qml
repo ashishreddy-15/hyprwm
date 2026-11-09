@@ -36,10 +36,20 @@ Variants {
         // Super+B: the island slides down out of view and its space is given
         // back to windows; clicks pass through while hidden
         exclusiveZone: Status.barShown ? islandHeight : 0
-        mask: Region { item: Status.barShown ? island : null }
+        mask: Region { item: hitbox }
         color: "transparent"
         Spring { id: hideY; preset: Theme.springs.rise; to: Status.barShown ? 0 : bar.islandHeight + bar.glowRoom + 6 }
         readonly property real shownness: 1 - hideY.value / (islandHeight + glowRoom + 6)
+
+        // input region: tracks real geometry (collapsed to nothing while hidden),
+        // since swapping the Region's item to null and back left clicks dead
+        Item {
+            id: hitbox
+            x: 0
+            y: bar.glowRoom
+            width: Status.barShown ? bar.width : 0
+            height: Status.barShown ? bar.height - bar.glowRoom : 0
+        }
 
         Calendar { id: calendar; bar: bar }
         PowerPanel { id: powerPanel; bar: bar }   // click the battery meter
