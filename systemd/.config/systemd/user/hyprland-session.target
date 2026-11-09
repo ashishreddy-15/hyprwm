@@ -1,0 +1,10 @@
+# Same as the one the hyprland package ships, which the COPR build installs to
+# /usr/lib64/systemd/user/ where systemd never looks. Started by autostart.lua;
+# brings up graphical-session.target (needed by xdg-desktop-portal).
+[Unit]
+Description=Hyprland session
+Documentation=man:systemd.special(7)
+BindsTo=graphical-session.target
+Wants=graphical-session-pre.target
+After=graphical-session-pre.target
+PropagatesStopTo=graphical-session.target

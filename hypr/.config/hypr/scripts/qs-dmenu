@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# A `rofi -dmenu` stand-in that uses the Quickshell launcher's menu mode.
+#
+#   printf '%s\n' a b c | qs-dmenu PROMPT [CURRENT]
+#
+# Prints the chosen line. Exits 1 when cancelled (Escape, click outside,
+# or the launcher being opened for something else).
+set -euo pipefail
+
+prompt=${1:-menu}
+current=${2:-}
+
+dir=$(mktemp -d "${XDG_RUNTIME_DIR:-/tmp}/qs-dmenu.XXXXXX")
+trap 'rm -rf "$dir"' EXIT
+cat > "$dir/options"
+mkfifo "$dir/out"
+
+qs ipc call launcher dmenu "$prompt" "$current" "$dir/options" "$dir/out" >/dev/null
+
+# Quickshell writes exactly one line (empty = cancelled). The timeout keeps a
+# script from hanging forever if Quickshell is restarted while the menu is open.
+choice=$(timeout 600 head -n1 "$dir/out" || true)
+[[ -n $choice ]] || exit 1
+printf '%s\n' "$choice"
