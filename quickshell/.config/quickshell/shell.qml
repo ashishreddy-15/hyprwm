@@ -25,5 +25,6 @@ ShellRoot {
     Launcher { id: launcher }
     PowerMenu { id: power }
     Overview { id: overview }
+    Ambient {}
     Shortcuts { launcher: launcher; power: power; notifications: notifications; overview: overview }
 }

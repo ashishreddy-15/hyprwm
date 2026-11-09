@@ -132,7 +132,7 @@ hl.bind("CTRL + Print",  exec(scripts .. "screenshot.sh area"))
 hl.bind("SHIFT + Print", exec(scripts .. "record.sh"))
 
 -- ── Tools ──
-hl.bind(key("n"),               exec(scripts .. "nightlight.sh"))
+hl.bind(key("n"),               exec(scripts .. "nightlight.py toggle")) -- warm / day, until the next sunrise or sunset
 hl.bind(key("grave"),           qs("notif-history"))
 hl.bind(key("SHIFT + grave"),   qs("notif-clear"))
 hl.bind(key("SHIFT + n"),       qs("dnd"))

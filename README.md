@@ -52,6 +52,11 @@ live screens along the photo's horizon band, over a dimmed, blurred copy of
 the wallpaper. Click or Enter to go there, click a window to focus it, drag a
 window onto another card to move it; the last card opens a new workspace.
 
+**Ambient screen.** After two minutes without input, every screen fades to the
+wallpaper with the clock large in the sky, as on the lock screen. Any key or
+mouse movement brings the desktop back. The lock screen still comes at five
+minutes, and nothing changes while keep-awake is on.
+
 **Also:** volume and brightness OSD above the bar, power menu that asks before
 logging out, rebooting or shutting down, tray menus for nm-applet and
 blueman drawn in the same style (not Qt's default), a lock screen with the
@@ -98,7 +103,7 @@ The values were tuned from frame-by-frame screen recordings (wf-recorder at
 | `Super+Shift+B` · `Super+Shift+V` · `Super+T` | next window opens right · below · toggle split |
 | `Super+-` · `Super+Shift+-` | scratchpad show · send |
 | `` Super+` `` · `` Super+Shift+` `` · `Super+Shift+N` | notification center · clear all · do not disturb |
-| `Super+N` · `Super+Shift+A` | night light · appearance (GTK theme, icons, cursor, font) |
+| `Super+N` · `Super+Shift+A` | night light (follows sunset; press to flip it until the next sunrise or sunset) · appearance (GTK theme, icons, cursor, font) |
 | `Super+[` · `Super+]` | brightness (laptop panel or DDC monitor, whichever is focused) |
 | `Print` · `Alt+Print` · `Ctrl+Print` · `Shift+Print` | screenshot screen · window · area · record area |
 | click the clock · click the battery | calendar · power panel |

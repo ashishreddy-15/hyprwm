@@ -30,6 +30,9 @@ hl.on("hyprland.start", function()
         .. " && systemctl --user start hyprland-session.target")
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
 
+    -- Night light follows the sun (scripts/nightlight.py); one instance only
+    hl.exec_cmd(scripts .. "nightlight.py daemon")
+
     -- Idle: lock 5 min, screens off 10 min, suspend on battery 15 min
     hl.exec_cmd(scripts .. "keep-awake.sh start")
 
