@@ -94,9 +94,15 @@ Scope {
     }
     function dmenuResults() {
         const words = term.toLowerCase().split(/\s+/).filter(w => w.length > 0);
-        return dmenuItems
+        const rows = dmenuItems
             .filter(l => words.every(w => l.toLowerCase().indexOf(w) >= 0))
             .map(l => ({ title: l, subtitle: l === dmenuCurrent ? "current" : "" }));
+        // Like rofi -dmenu: typed text that isn't an item can be returned as is
+        // (e.g. a custom size); the script decides whether it's valid. It comes
+        // first only when nothing matches, so "2" still picks 22 / 24 first.
+        if (term !== "" && dmenuItems.indexOf(term) < 0)
+            rows.push({ title: term, subtitle: "custom" });
+        return rows;
     }
 
     // ── Apps ──
@@ -521,7 +527,7 @@ Scope {
                     topPadding: 2
                     spacing: win.fontSize * 1.4
                     Repeater {
-                        model: root.mode === "dmenu" ? [["↵", "choose"], ["esc", "back"]]
+                        model: root.mode === "dmenu" ? [["↵", "choose"], ["type", "custom value"], ["esc", "back"]]
                              : root.mode === "clipboard" ? [["↵", "copy"], ["⇧ del", "remove"], ["esc", "close"]]
                              : root.mode === "emoji" ? [["↵", "copy and type"], ["esc", "close"]]
                              : root.mode === "calc" ? [["↵", "copy result"], ["esc", "close"]]

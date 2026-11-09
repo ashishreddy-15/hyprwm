@@ -111,7 +111,9 @@ twin_theme() {
     list_gtk_themes | grep -qxF -- "$candidate" && echo "$candidate" || echo "$theme"
 }
 
-pick_size() { printf '%s\n' "${@:2}" | menu "$1"; }
+# pick_size PROMPT CURRENT SIZES...  (the current size is preselected; typing
+# a value that isn't listed returns it as a custom size)
+pick_size() { printf '%s\n' "${@:3}" | menu "$1" "$2"; }
 
 if [[ ${1:-} == --sync ]]; then
     write_ini
@@ -162,7 +164,7 @@ while true; do
             ;;
         "Cursor")
             t=$(list_cursor_themes | sort -u | menu "Cursor" "$(get cursor-theme)") || continue
-            s=$(pick_size "Size" 16 24 32 48 64) || continue
+            s=$(pick_size "Cursor size" "$(get cursor-size)" 16 22 24 32 48 64) || continue
             [[ $s =~ ^[0-9]+$ ]] || continue
             set_ cursor-theme "$t"
             set_ cursor-size "$s"
@@ -171,7 +173,7 @@ while true; do
         "Font")
             cur=$(get font-name)
             f=$(list_fonts | menu "Font" "${cur% *}") || continue
-            s=$(pick_size "Size" 9 10 10.5 11 12 13 14) || continue
+            s=$(pick_size "Font size" "${cur##* }" 9 10 10.5 11 12 13 14) || continue
             [[ $s =~ ^[0-9]+(\.[0-9]+)?$ ]] || continue
             set_ font-name "$f $s"
             ;;
