@@ -36,7 +36,9 @@ Item {
                     id: icon
                     required property var modelData
                     anchors.verticalCenter: parent.verticalCenter
-                    implicitSize: root.fontSize + 2
+                    // about the height of the bar's capital letters, so icons sit
+                    // with the text instead of outweighing it
+                    implicitSize: Math.round(root.fontSize * 0.86)
                     source: modelData.icon
 
                     // Muted like the launcher; full colour while hovered
