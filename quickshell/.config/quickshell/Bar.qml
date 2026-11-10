@@ -8,7 +8,7 @@ import Quickshell.Wayland
 // Glow island: one centred island at the bottom of every screen.
 //   left:   this screen's workspaces · the focused window, or a system glance
 //   centre: date and time (click: calendar)
-//   right:  modes (REC, AWAKE, DND, PERF in amber; SAVER grey; only while on) · VOL · BAT (click: power panel) · tray
+//   right:  modes (REC, AWAKE, DND, PERF in amber; SAVER grey; only while on) · VOL (BT on a Bluetooth output) · BAT (click: power panel) · tray
 // A soft glow on the island's top edge sits above the active workspace;
 // it dims on the screen that doesn't have focus.
 Variants {
@@ -57,6 +57,10 @@ Variants {
         PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
         readonly property var sink: Pipewire.defaultAudioSink
         readonly property var battery: UPower.displayDevice
+        // the default output is a Bluetooth device (headphones, earbuds, speaker)
+        readonly property bool wireless: sink !== null && (
+            (sink.properties && sink.properties["device.api"] === "bluez5")
+            || (sink.name !== undefined && sink.name.startsWith("bluez_output")))
 
         Rectangle {
             id: island
@@ -150,7 +154,8 @@ Variants {
                     // NaN until Pipewire knows the channel volumes
                     readonly property real vol: bar.sink && bar.sink.audio && isFinite(bar.sink.audio.volume) ? bar.sink.audio.volume : 0
                     fontSize: bar.fontSize
-                    label: muted ? "MUTE" : "VOL"
+                    // VOL on the speakers, BT on a Bluetooth output (like BAT / CHR / AC below)
+                    label: muted ? "MUTE" : bar.wireless ? "BT" : "VOL"
                     fraction: vol
                     value: Math.round(vol * 100)
                     dimmed: muted

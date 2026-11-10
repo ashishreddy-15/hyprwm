@@ -32,7 +32,7 @@ stays grey, including app icons until you select them.
 - Right: modes only while they're on (REC, AWAKE, DND, PERF in amber, SAVER
   in grey), volume and battery meters, and a `···` tray drawer. The meters'
   sky-to-accent gradient spans the whole track, so the colour itself shows
-  the level. Scroll the volume to change it, click it to mute. The battery
+  the level. Scroll the volume to change it, click it to mute. Its label reads BT while the output is a Bluetooth device. The battery
   reads BAT, CHR or AC, glows softly while charging, and a single sweep of
   light runs along it when the charger is plugged in or out.
 - Click the battery for the **power panel**: power profile (saver, balanced,
