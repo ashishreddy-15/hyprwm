@@ -1,0 +1,350 @@
+# Horizon — Plymouth splash (built by setup/boot/build.py, installed by setup/boot.sh)
+#
+#   boot      the photo fades up from black (dawn). The disk passphrase is
+#             dots over the horizon line, as on the lock screen: red after a
+#             wrong one, CAPS LOCK in amber. Once the disk opens, a point of
+#             light runs along the photo's own horizon as boot progresses.
+#   shutdown / reboot   the light runs back to the left and the photo darkens.
+#   updates   UPDATING in the sky, the light follows the update's progress.
+#
+# With several screens the form and the light go on the largest; every screen
+# shows the photo. Refresh runs at Plymouth's default 50 Hz; t counts frames.
+# Plymouth can't say "wrong passphrase", so: a passphrase was sent and the
+# prompt came back = it was wrong. The root file system mounting = it was right.
+
+HORIZON = 0.528;      # the photo's horizon, as a fraction of its height
+FPS = 50;
+
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+mode = Plymouth.GetMode();
+going_down = 0;
+if (mode == "shutdown" || mode == "reboot") going_down = 1;
+updating = 0;
+if (mode == "updates" || mode == "system-upgrade" || mode == "firmware-upgrade") updating = 1;
+
+img.wall = Image("wallpaper.png");
+img.line = Image("line-accent.png");
+img.line_red = Image("line-red.png");
+img.dot = Image("dot.png");
+img.glow = Image("glow.png");
+img.trail = Image("trail.png");
+img.who = Image("t-who.png");
+img.type = Image("t-type.png");
+img.checking = Image("t-checking.png");
+img.wrong = Image("t-wrong.png");
+img.caps = Image("t-caps.png");
+if (mode == "reboot") img.sky = Image("t-restart.png");
+if (mode == "shutdown") img.sky = Image("t-shutdown.png");
+if (updating) img.sky = Image("t-update.png");
+
+t = 0;
+state.asking = 0;      # the passphrase prompt is up
+state.ever_asked = 0;
+state.bullets = 0;
+state.submitted = 0;   # a passphrase was sent, no verdict yet
+state.submit_t = 0;
+state.failed = 0;
+state.unlocked = 0;    # the passphrase worked (or none was needed)
+state.question = 0;
+form_op = 0;
+progress = 0;          # Plymouth's boot progress estimate, 0..1
+p0 = -1;               # progress when the light set off
+light = 0;             # where the light is, 0..1 across the screen
+light_op = 0;
+update_pct = -1;
+msg_text = "";
+trail_w = -1;
+shown_bullets = -1;
+
+# ── layout (again on hotplug) ──────────────────────────────────────────────
+fun centre(sprite, image, y, z)
+  {
+    sprite.SetImage(image);
+    sprite.SetPosition(Math.Int(cx - image.GetWidth() / 2), Math.Int(y), z);
+    sprite.SetOpacity(0);
+  }
+
+fun layout()
+  {
+    global.walls = [];
+    best = -1;
+    main = 0;
+    n = 0;
+    for (i = 0; Window.GetWidth(i); i++)
+      {
+        w = Window.GetWidth(i);
+        h = Window.GetHeight(i);
+        iw = img.wall.GetWidth();
+        ih = img.wall.GetHeight();
+        # (not "s": that would hide the global s that holds the sprites)
+        scale = Math.Max(w / iw, h / ih);
+        sw = Math.Max(Math.Int(iw * scale + 0.5), w);
+        sh = Math.Max(Math.Int(ih * scale + 0.5), h);
+        ox = Math.Int((sw - w) / 2);
+        oy = Math.Int((sh - h) / 2);
+        global.walls[i] = Sprite(img.wall.Scale(sw, sh).Crop(ox, oy, w, h));
+        walls[i].SetPosition(Window.GetX(i), Window.GetY(i), 0);
+        walls[i].SetOpacity(0);
+        horizon_y[i] = Window.GetY(i) + Math.Int(HORIZON * sh) - oy;
+        if (w * h > best)
+          {
+            best = w * h;
+            main = i;
+          }
+        n++;
+      }
+    global.heads = n;
+
+    global.X = Window.GetX(main);
+    global.Y = Window.GetY(main);
+    global.W = Window.GetWidth(main);
+    global.H = Window.GetHeight(main);
+    global.cx = X + W / 2;
+    global.u = H / 1200;
+    global.HY = horizon_y[main];
+
+    # the form, laid out as on the lock screen (Lock.qml, 1200 px tall)
+    global.s.who = Sprite();       centre(s.who, img.who, Y + 784 * u, 10);
+    global.s.type = Sprite();      centre(s.type, img.type, Y + 834 * u - img.type.GetHeight() / 2, 10);
+    global.s.checking = Sprite();  centre(s.checking, img.checking, Y + 834 * u - img.checking.GetHeight() / 2, 10);
+    global.s.line = Sprite();      centre(s.line, img.line, Y + 864 * u, 10);
+    global.s.line_red = Sprite();  centre(s.line_red, img.line_red, Y + 864 * u, 10);
+    global.s.wrong = Sprite();     centre(s.wrong, img.wrong, Y + 888 * u - img.wrong.GetHeight() / 2, 10);
+    global.s.caps = Sprite();      centre(s.caps, img.caps, Y + 888 * u - img.caps.GetHeight() / 2, 10);
+    global.dots = [];
+    for (i = 0; i < 24; i++)
+      {
+        dots[i] = Sprite(img.dot);
+        dots[i].SetPosition(0, Math.Int(Y + 834 * u - img.dot.GetHeight() / 2), 10);
+        dots[i].SetOpacity(0);
+      }
+    global.shown_bullets = -1;
+    # free-text prompts (rare: a question instead of a passphrase)
+    global.s.qprompt = Sprite();
+    global.s.qprompt.SetOpacity(0);
+    global.s.qentry = Sprite();
+    global.s.qentry.SetOpacity(0);
+
+    global.s.sky = Sprite();
+    if (img.sky) centre(s.sky, img.sky, Y + 348 * u, 10);
+
+    global.s.trail = Sprite();
+    global.s.trail.SetPosition(X, HY - 1, 5);
+    global.s.trail.SetOpacity(0);
+    global.trail_w = -1;
+    global.s.glow = Sprite(img.glow);
+    global.s.glow.SetOpacity(0);
+
+    global.s.msg = Sprite();
+    global.s.msg.SetOpacity(0);
+    if (msg_text != "") show_message(msg_text);
+  }
+
+# ── every frame ────────────────────────────────────────────────────────────
+fun ease(k)
+  {
+    k = Math.Clamp(k, 0, 1);
+    return 1 - (1 - k) * (1 - k) * (1 - k);
+  }
+
+fun draw_light(pos, op)
+  {
+    s.glow.SetPosition(Math.Int(X + pos * W - img.glow.GetWidth() / 2), Math.Int(HY - img.glow.GetHeight() / 2), 6);
+    s.glow.SetOpacity(op);
+    tw = Math.Int(pos * W);
+    if (tw != trail_w)
+      {
+        global.trail_w = tw;
+        if (tw >= 1) s.trail.SetImage(img.trail.Scale(tw, 1));
+      }
+    if (tw >= 1) s.trail.SetOpacity(op);
+    else s.trail.SetOpacity(0);
+  }
+
+fun refresh_down()
+  {
+    # quick fade in, then the light runs back and the photo darkens
+    k = (t - FPS * 0.6) / (FPS * 3.6);
+    wall_op = ease(t / (FPS * 0.6));
+    if (k > 0.55) wall_op = 1 - Math.Clamp((k - 0.55) / 0.45, 0, 1);
+    for (i = 0; i < heads; i++) walls[i].SetOpacity(wall_op);
+    if (img.sky) s.sky.SetOpacity(wall_op);
+    op = wall_op;
+    if (k < 0) op = 0;
+    draw_light(1 - ease(k), op);
+  }
+
+fun refresh_boot()
+  {
+    # dawn: the photo fades up from black
+    dawn = ease(t / (FPS * 1.4));
+    for (i = 0; i < heads; i++) walls[i].SetOpacity(dawn);
+    if (img.sky) s.sky.SetOpacity(dawn);
+
+    # no verdict on a passphrase after 6 s and no new prompt: it worked
+    if (state.submitted && t - state.submit_t > FPS * 6)
+      {
+        state.submitted = 0;
+        state.unlocked = 1;
+      }
+
+    # ── the form ──
+    want = 0;
+    if ((state.asking || state.submitted || state.question) && !state.unlocked) want = 1;
+    global.form_op += (want - form_op) * 0.15;
+    f = form_op * dawn;
+    if (f < 0.01) f = 0;
+
+    s.who.SetOpacity(f * (1 - state.question));
+    s.qprompt.SetOpacity(f * state.question);
+    s.qentry.SetOpacity(f * state.question);
+
+    typing = state.bullets > 0;
+    a = 0;
+    if (!state.question && !typing && !state.submitted) a = 1;
+    s.type.SetOpacity(f * a);
+    a = 0;
+    if (!state.question && !typing && state.submitted) a = 1;
+    s.checking.SetOpacity(f * a);
+
+    a = 0.5;
+    if (typing || state.submitted) a = 1;
+    if (state.failed) a = 0;
+    s.line.SetOpacity(f * a);
+    s.line_red.SetOpacity(f * state.failed);
+
+    caps = 0;
+    if (want && !state.failed && Plymouth.GetCapslockState()) caps = 1;
+    s.wrong.SetOpacity(f * state.failed);
+    s.caps.SetOpacity(f * caps);
+
+    nb = Math.Min(state.bullets, 24);
+    if (state.question) nb = 0;
+    if (nb != shown_bullets)
+      {
+        global.shown_bullets = nb;
+        pitch = 17;
+        x0 = cx - (nb * pitch - (pitch - img.dot.GetWidth())) / 2;
+        for (i = 0; i < 24; i++) dots[i].SetX(Math.Int(x0 + i * pitch));
+      }
+    for (i = 0; i < 24; i++)
+      {
+        if (i < nb) dots[i].SetOpacity(f);
+        else dots[i].SetOpacity(0);
+      }
+
+    # ── the light along the horizon ──
+    # sets off once the disk is open, or after 3 s if nothing asked for a passphrase
+    ready = state.unlocked;
+    if (!state.ever_asked && t > FPS * 3) ready = 1;
+    if (ready && p0 < 0) global.p0 = progress;
+    if (p0 >= 0)
+      {
+        target = (progress - p0) / Math.Max(1 - p0, 0.01);
+        if (updating && update_pct >= 0) target = update_pct / 100;
+        target = Math.Clamp(target, 0, 1);
+        if (target > light) global.light += (target - light) * 0.08;
+        global.light_op += (1 - light_op) * 0.08;
+      }
+    draw_light(light, light_op * dawn);
+  }
+
+fun refresh()
+  {
+    global.t++;
+    if (going_down) refresh_down();
+    else refresh_boot();
+  }
+
+Plymouth.SetRefreshFunction(refresh);
+
+# ── Plymouth's callbacks ───────────────────────────────────────────────────
+fun on_progress(duration, p)
+  {
+    global.progress = p;
+  }
+
+fun on_update(pct)
+  {
+    global.update_pct = pct;
+  }
+
+fun on_root_mounted()
+  {
+    state.submitted = 0;
+    state.unlocked = 1;
+  }
+
+fun on_password(prompt, bullets)
+  {
+    if (!state.asking)
+      {
+        state.asking = 1;
+        state.ever_asked = 1;
+        state.unlocked = 0;
+        if (state.submitted)
+          {
+            state.failed = 1;      # the prompt came back: wrong passphrase
+            state.submitted = 0;
+          }
+      }
+    if (bullets > 0) state.failed = 0;
+    state.bullets = bullets;
+  }
+
+fun on_question(prompt, entry)
+  {
+    state.question = 1;
+    state.unlocked = 0;
+    pi = Image.Text(prompt, 0.353, 0.380, 0.322);
+    s.qprompt.SetImage(pi);
+    s.qprompt.SetPosition(Math.Int(cx - pi.GetWidth() / 2), Math.Int(Y + 784 * u), 10);
+    if (entry == "") entry = " ";
+    ei = Image.Text(entry, 0.902, 0.910, 0.882);
+    s.qentry.SetImage(ei);
+    s.qentry.SetPosition(Math.Int(cx - ei.GetWidth() / 2), Math.Int(Y + 834 * u - ei.GetHeight() / 2), 10);
+  }
+
+fun on_normal()
+  {
+    if (state.asking)
+      {
+        state.asking = 0;
+        state.submitted = 1;
+        state.submit_t = t;
+        state.bullets = 0;
+      }
+    state.question = 0;
+  }
+
+fun show_message(text)
+  {
+    global.msg_text = text;
+    mi = Image.Text(text, 0.549, 0.576, 0.518);
+    s.msg.SetImage(mi);
+    s.msg.SetPosition(Math.Int(cx - mi.GetWidth() / 2), Math.Int(Y + H - 48 * u - mi.GetHeight()), 10);
+    s.msg.SetOpacity(1);
+  }
+
+fun hide_message(text)
+  {
+    if (text == msg_text)
+      {
+        global.msg_text = "";
+        s.msg.SetOpacity(0);
+      }
+  }
+
+layout();
+
+Plymouth.SetBootProgressFunction(on_progress);
+Plymouth.SetSystemUpdateFunction(on_update);
+Plymouth.SetRootMountedFunction(on_root_mounted);
+Plymouth.SetDisplayPasswordFunction(on_password);
+Plymouth.SetDisplayQuestionFunction(on_question);
+Plymouth.SetDisplayNormalFunction(on_normal);
+Plymouth.SetDisplayMessageFunction(show_message);
+Plymouth.SetHideMessageFunction(hide_message);
+Plymouth.SetDisplayHotplugFunction(layout);

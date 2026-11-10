@@ -1,0 +1,65 @@
+# Horizon — GRUB boot menu (built by setup/boot/build.py; installed by setup/boot.sh)
+#
+# The photo, nothing in the sky; the menu centred on the ground below the
+# horizon. Entries grey, the chosen one white with the horizon line under it.
+# A line under the menu shrinks with the countdown (any key stops it).
+# Drawn for the 1920×1200 panel; positions are relative so other modes work.
+
+title-text: ""
+desktop-image: "background.png"
+desktop-image-scale-method: "crop"
+desktop-color: "#13160f"
+message-font: "Maple Mono Regular 15"
+message-color: "#8c9384"
+terminal-font: "Maple Mono Regular 17"
+terminal-box: "terminal_*.png"
+terminal-left: "10%"
+terminal-top: "10%"
+terminal-width: "80%"
+terminal-height: "80%"
+terminal-border: "0"
+
++ boot_menu {
+    left = 50%-360
+    top = 60%
+    width = 720
+    height = 214
+    item_font = "Maple Mono Regular 19"
+    selected_item_font = "Maple Mono Regular 19"
+    item_color = "#8c9384"
+    selected_item_color = "#e6e8e1"
+    item_height = 42
+    item_spacing = 10
+    item_padding = 0
+    icon_width = 0
+    icon_height = 0
+    item_icon_space = 0
+    selected_item_pixmap_style = "select_*.png"
+    scrollbar = false
+}
+
+# countdown: the line shrinks, the words count down; both hide on a key press
++ progress_bar {
+    id = "__timeout__"
+    left = 50%-360
+    top = 81%-12
+    width = 720
+    height = 24
+    show_text = false
+    bar_style = "timeout_bar_*.png"
+    highlight_style = "timeout_hl_*.png"
+}
++ label {
+    id = "__timeout__"
+    left = 0
+    top = 81%+16
+    width = 100%
+    height = 22
+    align = "center"
+    font = "Maple Mono Regular 15"
+    color = "#5a6152"
+    text = "starts in %ds"
+}
+
+# key hints along the bottom, where the lock screen shows the battery
+@HINTS@

@@ -174,6 +174,45 @@ directory; the greeter's compositor setup (outputs, input, lid) stays with
 `~/swaywm/setup/sddm.sh`. If the greeter ever breaks: Ctrl+Alt+F3, log in,
 `sudo rm /etc/sddm.conf.d/20-horizon.conf && sudo systemctl restart sddm`.
 
+## Boot screens (GRUB and Plymouth)
+
+`setup/boot.sh` installs the screens before the login, in the same scene:
+- **GRUB menu:** the photo, the menu on the ground below the horizon, the
+  chosen entry white with the horizon line under it, and a countdown line that
+  shrinks (any key stops it).
+- **Plymouth splash:** the photo fades up from black. The disk passphrase is
+  dots over the horizon line, red after a wrong one, CAPS LOCK in amber. Once
+  the disk opens, a point of light runs along the photo's horizon while the
+  system starts. Shutdown and restart run the light back and darken the photo.
+
+```sh
+sudo dnf install plymouth-plugin-script   # Fedora repo
+setup/boot.sh --dry-run        # what would change
+setup/boot.sh --preview-grub   # the GRUB menu in a QEMU window (needs qemu-system-x86-core, edk2-ovmf)
+setup/boot.sh --test           # the splash, from a text console (Ctrl+Alt+F3)
+setup/boot.sh                  # install both (sudo); --only grub|plymouth for one
+setup/boot.sh --uninstall      # back to the text menu and "bgrt"
+```
+
+The GRUB theme goes in `/boot/grub2/themes/horizon`, switched on by
+`/boot/grub2/custom.cfg`, which Fedora's grub.cfg already loads. grub2-mkconfig
+is never run, so the boot entries (Windows included) stay as they are. The
+splash rebuilds the initramfs (`plymouth-set-default-theme -R`). Every word on
+the splash is drawn into a PNG at build time (`setup/boot/build.py`), so it
+doesn't need fonts during early boot.
+
+Before installing, the script takes a snapper snapshot of `/` ("before
+Horizon boot themes") and, since `/boot` is a separate partition outside the
+snapshot, keeps the running kernel's initramfs as
+`/boot/initramfs-<version>.img.pre-horizon`. `--preview-grub` boots Fedora's
+own GRUB in QEMU; without `qemu-ui-gtk` it saves screenshots instead of
+opening a window.
+
+If boot goes wrong: a broken GRUB theme falls back to the text menu, and a
+broken splash falls back to a text passphrase prompt (Esc shows it at any
+time). Last resort: in GRUB press `e`, delete `rhgb quiet`, `Ctrl+X`, then
+`setup/boot.sh --uninstall`.
+
 ## Checking changes
 
 ```sh

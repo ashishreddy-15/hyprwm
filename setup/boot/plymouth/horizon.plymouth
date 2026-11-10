@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Horizon
+Description=Dusk horizon: the disk passphrase on the horizon line, then a light along the horizon while the system starts
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/horizon
+ScriptFile=/usr/share/plymouth/themes/horizon/horizon.script
