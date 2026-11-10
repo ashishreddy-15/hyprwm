@@ -5,7 +5,8 @@ import Quickshell.Io
 import Quickshell.Wayland
 
 // Power menu (Super+X), rising out of the bar like the launcher.
-// Lock and Suspend run straight away: nothing is lost. Log out, Reboot and
+// Lock, Suspend and Restart shell (Quickshell, e.g. a meter stuck) run
+// straight away: nothing is lost. Log out, Reboot and
 // Shut down close every app, so the first Enter only arms them (the row turns
 // amber and asks); a second Enter confirms. Moving or Escape cancels.
 // Keys: Up/Down or J/K, Enter, or the letter shown on each row.
@@ -21,6 +22,8 @@ Scope {
     readonly property var actions: [
         { key: "l", label: "Lock",      confirm: false, run: () => Quickshell.execDetached(["loginctl", "lock-session"]) },
         { key: "s", label: "Suspend",   confirm: false, run: () => Quickshell.execDetached(["systemctl", "suspend"]) },
+        // restarts this shell too, so the script runs detached (Super+Ctrl+R does the same)
+        { key: "q", label: "Restart shell", confirm: false, run: () => Quickshell.execDetached([Quickshell.env("HOME") + "/.config/hypr/scripts/qs-restart.sh"]) },
         { key: "e", label: "Log out",   confirm: true,  run: () => Hyprland.dispatch("hl.dsp.exit()") },
         { key: "r", label: "Reboot",    confirm: true,  run: () => Quickshell.execDetached(["systemctl", "reboot"]) },
         { key: "p", label: "Shut down", confirm: true,  run: () => Quickshell.execDetached(["systemctl", "poweroff"]) },

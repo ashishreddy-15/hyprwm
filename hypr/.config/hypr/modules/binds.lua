@@ -33,6 +33,7 @@ hl.bind(key("CTRL + v"),          exec('cliphist wipe && notify-send -u low "Cli
 hl.bind(key("c"),                 qs("calc"))
 hl.bind(key("period"),            qs("emoji"))
 hl.bind(key("SHIFT + r"),         hl.dsp.reload_config())
+hl.bind(key("CTRL + r"),          exec(scripts .. "qs-restart.sh")) -- restart Quickshell (not a global shortcut: works when it's stuck)
 hl.bind(key("SHIFT + Escape"),    exec("loginctl lock-session"))
 hl.bind(key("SHIFT + e"),         hl.dsp.exit()) -- log out (the power menu, Super+X, asks first)
 

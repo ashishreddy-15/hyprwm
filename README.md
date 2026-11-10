@@ -119,6 +119,7 @@ The values were tuned from frame-by-frame screen recordings (wf-recorder at
 | `Super+O` | workspace overview: live previews; arrows / 1…0 / click to go, drag a window onto another workspace |
 | `Super+D` · `Super+C` · `Super+.` · `Super+V` | launcher: apps · calculator · emoji · clipboard |
 | `Super+X` · `Super+Shift+E` | power menu · log out |
+| `Super+Ctrl+R` · `Super+Shift+R` | restart Quickshell (also in the power menu) · reload the Hyprland config |
 | `Super+Shift+Escape` | lock |
 | `Super+Q` | close window |
 | `Super+H/J/K/L` (or arrows) | focus; `+Shift` move, `+Ctrl` resize |
@@ -250,8 +251,11 @@ qs ipc call polkit status                # "registered" when Quickshell is the p
 hyprctl globalshortcuts                  # the quickshell:* shortcuts the keys use
 ```
 
-If the launcher, power menu or notification keys stop responding, Quickshell
-isn't running: `hyprctl dispatch 'hl.dsp.exec_cmd("qs")'`.
+If the bar or a panel gets into a bad state, `Super+Ctrl+R` (or "Restart shell"
+in the power menu) restarts Quickshell (`scripts/qs-restart.sh`). It is a
+Hyprland bind, so it works even when Quickshell is stuck; it does nothing while
+the lock screen is up. If the launcher, power menu or notification keys stop
+responding, Quickshell isn't running: press `Super+Ctrl+R`.
 
 ## Not shared with Sway
 
