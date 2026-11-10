@@ -117,13 +117,15 @@ def grub(out, wallpaper, fonts):
     blank(out / "select_sw.png", (28, 5))
     blank(out / "select_se.png", (28, 5))
     blank(out / "select_c.png")
-    # countdown line: only the shrinking highlight is drawn
-    # (GRUB gives the bar a taller box than asked for, so the line is drawn
-    # into a 24 px tall piece at row 12 instead of filling the whole box)
-    blank(out / "timeout_bar_c.png", (1, 24))
-    hl = Image.new("RGBA", (1, 24))
-    hl.putpixel((0, 12), rgba(ACCENT, 0.85))
-    hl.save(out / "timeout_hl_c.png")
+    # countdown line. GRUB's bar fills with *elapsed* time, so the full line is
+    # the bar itself and the growing fill covers it in the ground's colour
+    # (#13160f: the photo is flat there), leaving the remaining time visible.
+    # Both pieces are 24 px tall with the line on row 12: GRUB gives the bar a
+    # taller box than asked for and would otherwise fill all of it.
+    for name, colour in (("timeout_bar_c.png", rgba(ACCENT, 0.85)), ("timeout_hl_c.png", rgba(GROUND))):
+        piece = Image.new("RGBA", (1, 24))
+        piece.putpixel((0, 12), colour)
+        piece.save(out / name)
     # e (edit) and c (console) screens: a dark panel over the photo
     Image.new("RGBA", (1, 1), rgba(GROUND, 0.94)).save(out / "terminal_c.png")
 

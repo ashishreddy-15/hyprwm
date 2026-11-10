@@ -5,6 +5,10 @@ Runs next to the Sway setup in `~/swaywm`: same palette (`~/swaywm/colors.md`,
 plus `sky #06587a` for gradients), same keybindings, separate daemons.
 Pick **Hyprland** or **Sway** on the login screen.
 
+The same scene runs from the power button to the desktop: the GRUB menu, the
+disk passphrase at boot (Plymouth), the SDDM login, the desktop, and the lock
+screen all use the photo, Maple Mono and the horizon line.
+
 ![Empty workspace: the dusk wallpaper, a notification top right, and the launcher rising out of the bar island](docs/screenshot.png)
 
 Colour appears only where your attention is: the focused window's border
@@ -75,7 +79,10 @@ authenticate as (click to switch when there are several), the password on the
 horizon line (red and a small shake after a wrong one, CAPS LOCK in amber),
 and "details" for the polkit action id. Escape cancels. If Quickshell can't
 register as the agent, it starts hyprpolkitagent instead. Try it with
-`pkexec true`, which does nothing even when authorized.
+`pkexec true`, which does nothing even when authorized. Long messages stop at
+five lines; the full text is under "details".
+
+![The polkit prompt: a dark card over the blurred wallpaper, with polkit's message, the user name, and the password field on the horizon line](docs/screenshot-polkit.jpg)
 
 **Also:** volume and brightness OSD above the bar, power menu that asks before
 logging out, rebooting or shutting down, tray menus for nm-applet and
@@ -135,7 +142,7 @@ off only while another screen is connected.
 
 | Package      | Installs to             | What |
 | :----------- | :---------------------- | :--- |
-| `hypr`       | `~/.config/hypr`        | `hyprland.lua` (Lua config, Hyprland 0.57+) split into `modules/`, hypridle, hyprlock, scripts, wallpaper |
+| `hypr`       | `~/.config/hypr`        | `hyprland.lua` (Lua config, Hyprland 0.57+) split into `modules/`, hypridle, hyprlock (the lock screen's fallback), scripts, wallpaper |
 | `quickshell` | `~/.config/quickshell`  | wallpaper, bar, notifications, OSD, launcher, power menu, power panel, calendar, tray menus, lock screen, polkit prompt |
 | `systemd`    | `~/.config/systemd/user` | `hyprland-session.target` (needed for xdg-desktop-portal) and a drop-in keeping kanshi out of Hyprland |
 | `kitty`      | `~/.config/kitty`       | terminal, same font and colours as foot |
@@ -143,6 +150,10 @@ off only while another screen is connected.
 ```sh
 cd ~/hyprwm && stow hypr kitty quickshell systemd
 ```
+
+After adding a new file to a package, run `stow -R <package>` so it gets
+linked too. `setup/` isn't stowed: it holds the installers for the login
+screen (`setup/sddm.sh`) and the boot screens (`setup/boot.sh`), which need sudo.
 
 ## System packages
 
@@ -156,6 +167,10 @@ sudo dnf install hyprland hyprlock hypridle hyprpicker hyprpolkitagent hyprsunse
   xdg-desktop-portal-hyprland quickshell kitty qt6-qt5compat qt6-qtmultimedia \
   papirus-icon-theme-dark
 ```
+
+hyprpolkitagent is only the fallback now (Quickshell is the polkit agent), and
+hyprlock is the lock screen's fallback. For the boot screens:
+`plymouth-plugin-script` (Fedora repo) and `python3-pillow` to build them.
 
 Shared with the Sway setup (already installed there): grim, slurp, wl-clipboard,
 cliphist, brightnessctl, ddcutil, playerctl, wf-recorder, jq, libnotify,
@@ -194,6 +209,8 @@ directory; the greeter's compositor setup (outputs, input, lid) stays with
   the disk opens, a point of light runs along the photo's horizon while the
   system starts. Shutdown and restart run the light back and darken the photo.
 
+![The GRUB menu: the dusk photo, boot entries on the ground below the horizon, the first one white with the horizon line under it, and the countdown line below](docs/screenshot-grub.jpg)
+
 ```sh
 sudo dnf install plymouth-plugin-script   # Fedora repo
 setup/boot.sh --dry-run        # what would change
@@ -228,7 +245,8 @@ time). Last resort: in GRUB press `e`, delete `rhgb quiet`, `Ctrl+X`, then
 Hyprland --verify-config                 # Lua config errors, without reloading
 hyprctl configerrors                     # inside a running session
 qs ipc call shell reload                 # reload Quickshell (edits to stowed files aren't always noticed)
-qs ipc show                              # IPC targets for scripts (launcher, power, notifications, osd, shell)
+qs ipc show                              # IPC targets for scripts (launcher, power, notifications, osd, shell, lock, polkit)
+qs ipc call polkit status                # "registered" when Quickshell is the polkit agent
 hyprctl globalshortcuts                  # the quickshell:* shortcuts the keys use
 ```
 
@@ -238,6 +256,6 @@ isn't running: `hyprctl dispatch 'hl.dsp.exec_cmd("qs")'`.
 ## Not shared with Sway
 
 kanshi (Hyprland handles monitors itself: `modules/monitors.lua`), waybar,
-dunst, rofi, swayidle/swaylock, foot. Keep-awake state is separate too
+dunst, rofi, swayidle/swaylock, foot, the polkit agent. Keep-awake state is separate too
 (`$XDG_RUNTIME_DIR/hypr-keep-awake`). Shared: gsettings (appearance), the
 power profile (tuned-ppd), and the clipboard history.
