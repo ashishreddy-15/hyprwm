@@ -25,7 +25,7 @@ Item {
     property bool _ready: false
     property bool _skip: false   // the first frame after a start can be slow; don't let it eat the motion
     // (from() may already have been called by a parent's onCompleted; keep that motion)
-    Component.onCompleted: { if (!frames.running) value = to; _ready = true }
+    Component.onCompleted: { if (!frames.running && isFinite(to)) value = to; _ready = true }
     onToChanged: if (_ready) frames.running = true
 
     // Jump to `start` and spring towards `to`
@@ -41,7 +41,11 @@ Item {
             const dt = Math.min(frameTime, 0.05);
             const steps = Math.max(1, Math.ceil(dt / 0.004));
             const h = dt / steps;
-            let x = s.value, v = s.velocity;
+            // a non-finite target (e.g. Pipewire's volume before its channels are known
+            // is NaN) would poison value/velocity for good: hold still until it's real
+            if (!isFinite(s.to)) { running = false; return; }
+            let x = isFinite(s.value) ? s.value : s.to;
+            let v = isFinite(s.velocity) ? s.velocity : 0;
             for (let i = 0; i < steps; i++) {
                 const a = (-s.stiffness * (x - s.to) - s.damping * v) / s.mass;
                 v += a * h;

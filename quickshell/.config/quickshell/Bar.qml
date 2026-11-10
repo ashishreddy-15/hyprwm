@@ -147,7 +147,8 @@ Variants {
                     anchors.verticalCenter: parent.verticalCenter
                     visible: bar.sink !== null && bar.sink.audio !== null
                     readonly property bool muted: bar.sink && bar.sink.audio ? bar.sink.audio.muted : false
-                    readonly property real vol: bar.sink && bar.sink.audio ? bar.sink.audio.volume : 0
+                    // NaN until Pipewire knows the channel volumes
+                    readonly property real vol: bar.sink && bar.sink.audio && isFinite(bar.sink.audio.volume) ? bar.sink.audio.volume : 0
                     fontSize: bar.fontSize
                     label: muted ? "MUTE" : "VOL"
                     fraction: vol

@@ -55,7 +55,7 @@ Item {
             radius: 1
             color: Theme.border
 
-            Spring { id: fillW; preset: Theme.springs.settle; to: Math.max(0, Math.min(1, root.fraction)) * track.width }
+            Spring { id: fillW; preset: Theme.springs.settle; to: (isFinite(root.fraction) ? Math.max(0, Math.min(1, root.fraction)) : 0) * track.width }
 
             // static glow under the fill while `lit`
             Rectangle {
