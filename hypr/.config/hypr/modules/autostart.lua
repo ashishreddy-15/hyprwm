@@ -28,7 +28,8 @@ hl.on("hyprland.start", function()
     -- ~/.config/systemd/user/kanshi.service.d/ (stow package `systemd`).
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP HYPRLAND_INSTANCE_SIGNATURE"
         .. " && systemctl --user start hyprland-session.target")
-    hl.exec_cmd("systemctl --user start hyprpolkitagent")
+    -- polkit: Quickshell is the agent (Polkit.qml); it starts hyprpolkitagent
+    -- itself if it can't register
 
     -- Night light follows the sun (scripts/nightlight.py); one instance only
     hl.exec_cmd(scripts .. "nightlight.py daemon")

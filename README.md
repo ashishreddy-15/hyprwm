@@ -68,6 +68,15 @@ again; config reloads are refused while locked. If you're ever stuck on a red
 screen: Ctrl+Alt+F3, log in, then
 `hyprctl --instance 0 dispatch 'hl.dsp.exec_cmd("hyprlock")'`.
 
+**Polkit prompt.** Quickshell is the polkit agent: the password prompt for
+system actions (pkexec, installing software, power settings) is a card over
+the dimmed, blurred desktop, with polkit's own message, the user to
+authenticate as (click to switch when there are several), the password on the
+horizon line (red and a small shake after a wrong one, CAPS LOCK in amber),
+and "details" for the polkit action id. Escape cancels. If Quickshell can't
+register as the agent, it starts hyprpolkitagent instead. Try it with
+`pkexec true`, which does nothing even when authorized.
+
 **Also:** volume and brightness OSD above the bar, power menu that asks before
 logging out, rebooting or shutting down, tray menus for nm-applet and
 blueman drawn in the same style (not Qt's default), and Papirus-Dark icons for
@@ -127,7 +136,7 @@ off only while another screen is connected.
 | Package      | Installs to             | What |
 | :----------- | :---------------------- | :--- |
 | `hypr`       | `~/.config/hypr`        | `hyprland.lua` (Lua config, Hyprland 0.57+) split into `modules/`, hypridle, hyprlock, scripts, wallpaper |
-| `quickshell` | `~/.config/quickshell`  | wallpaper, bar, notifications, OSD, launcher, power menu, power panel, calendar, tray menus |
+| `quickshell` | `~/.config/quickshell`  | wallpaper, bar, notifications, OSD, launcher, power menu, power panel, calendar, tray menus, lock screen, polkit prompt |
 | `systemd`    | `~/.config/systemd/user` | `hyprland-session.target` (needed for xdg-desktop-portal) and a drop-in keeping kanshi out of Hyprland |
 | `kitty`      | `~/.config/kitty`       | terminal, same font and colours as foot |
 
