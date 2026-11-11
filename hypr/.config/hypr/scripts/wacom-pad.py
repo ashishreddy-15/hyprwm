@@ -72,7 +72,7 @@ PROFILES = [
     # title check matters: in a normal note these would type the letters "e"/"p".
     # Excalidraw files show up in Obsidian's window title as "<name>.excalidraw".
     {
-        "class": r"^obsidian$",
+        "class": r"obsidian",   # Flatpak reports "md.obsidian.Obsidian"
         "title": r"\.excalidraw",
         "keys": {
             3: "e",   # eraser
