@@ -240,6 +240,40 @@ broken splash falls back to a text passphrase prompt (Esc shows it at any
 time). Last resort: in GRUB press `e`, delete `rhgb quiet`, `Ctrl+X`, then
 `setup/boot.sh --uninstall`.
 
+## Wacom tablet (Intuos BT S)
+
+Works over USB and Bluetooth (pair once with `bluetoothctl`, then `trust` it so
+it reconnects by itself).
+
+- **Pen mapping** — `modules/tablet.lua` maps the pen to the Samsung when it is
+  connected, otherwise to the laptop panel, and crops the tablet area to the
+  screen's shape (16:9 for the Samsung) so strokes aren't stretched. It re-runs
+  when a monitor is plugged or unplugged.
+- **Pad buttons** — Hyprland has no pad bindings, so `scripts/wacom-pad.py`
+  reads the pad and types shortcuts through a virtual keyboard. It is started
+  from `modules/autostart.lua` and survives the tablet disconnecting.
+
+  | Key | Everywhere | Obsidian, on an `.excalidraw` drawing |
+  |---|---|---|
+  | 1 | Undo (`Ctrl+Z`) | |
+  | 2 | Redo (`Ctrl+Shift+Z`) | |
+  | 3 | | Eraser (`E`) |
+  | 4 | | Pen (`P`) |
+
+  To change a button, edit the `PROFILES` block at the top of the script (it
+  explains the syntax), then restart it: `pkill -f wacom-pad.py` and start
+  `~/.config/hypr/scripts/wacom-pad.py` again (or log out and in).
+  `wacom-pad.py learn` prints each button you press with the focused window's
+  class and title, for writing new rules.
+- **One-time system setup** (not in the repo):
+  `sudo dnf install python3-evdev` and `/etc/udev/rules.d/70-wacom-pad.rules`,
+  which gives the logged-in user read access to the pad and `/dev/uinput`:
+
+  ```
+  SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="Wacom Intuos BT S Pad", TAG+="uaccess"
+  KERNEL=="uinput", SUBSYSTEM=="misc", TAG+="uaccess", OPTIONS+="static_node=uinput"
+  ```
+
 ## Checking changes
 
 ```sh

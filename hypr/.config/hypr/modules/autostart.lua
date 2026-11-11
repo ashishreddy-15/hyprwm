@@ -34,6 +34,9 @@ hl.on("hyprland.start", function()
     -- Night light follows the sun (scripts/nightlight.py); one instance only
     hl.exec_cmd(scripts .. "nightlight.py daemon")
 
+    -- Wacom pad buttons -> shortcuts (scripts/wacom-pad.py; edit PROFILES there)
+    hl.exec_cmd("sh -c 'until " .. scripts .. "wacom-pad.py; do sleep 2; done'")
+
     -- Idle: lock 5 min, screens off 10 min, suspend on battery 15 min
     hl.exec_cmd(scripts .. "keep-awake.sh start")
 

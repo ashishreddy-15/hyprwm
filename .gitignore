@@ -11,3 +11,4 @@ Thumbs.db
 
 # Quickshell / QML tooling
 .qmlls.ini
+__pycache__/
