@@ -60,12 +60,14 @@ BUTTON_CODES = {
 #            pageup/pagedown, or any evdev name such as "KEY_BRIGHTNESSUP".
 #            The key is held while you hold the pad button (so "space" in
 #            Excalidraw = hold to pan). A button with no entry does nothing.
+#            A value starting with "!" runs a shell command instead (once, on
+#            press): "!playerctl play-pause"   "!playerctl position 10-"
 PROFILES = [
-    # Everywhere: undo / redo.
+    # Everywhere: undo, and play/pause for whatever media is playing.
     {
         "keys": {
             1: "ctrl+z",
-            2: "ctrl+shift+z",
+            2: "!playerctl play-pause",   # pause/play the video without leaving the notes
         },
     },
     # Only on an Excalidraw drawing in Obsidian: eraser and pen tool. The
@@ -93,6 +95,10 @@ ALIASES = {
     "end": "KEY_END", "pageup": "KEY_PAGEUP", "pagedown": "KEY_PAGEDOWN",
     "left": "KEY_LEFT", "right": "KEY_RIGHT", "up": "KEY_UP", "down": "KEY_DOWN",
 }
+
+
+def is_command(text):
+    return text.startswith("!")
 
 
 def parse_shortcut(text):
@@ -173,9 +179,11 @@ def run():
     # Validate every shortcut now so a typo fails loudly at startup.
     for p in PROFILES:
         for s in p.get("keys", {}).values():
-            parse_shortcut(s)
+            if not is_command(s):
+                parse_shortcut(s)
 
-    wanted = {c for p in PROFILES for s in p.get("keys", {}).values() for c in parse_shortcut(s)}
+    wanted = {c for p in PROFILES for s in p.get("keys", {}).values()
+              if not is_command(s) for c in parse_shortcut(s)}
     ui = UInput({ecodes.EV_KEY: sorted(wanted)}, name="Wacom pad shortcuts")
     held = {}  # pad button number -> key codes currently held down for it
 
@@ -203,6 +211,11 @@ def run():
                     if ev.value == 1:                          # pressed
                         shortcut = shortcut_for(button, *focused_window())
                         if not shortcut:
+                            continue
+                        if is_command(shortcut):               # "!cmd": run it once
+                            subprocess.Popen(shortcut[1:], shell=True, start_new_session=True,
+                                             stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                             stderr=subprocess.DEVNULL)
                             continue
                         codes = parse_shortcut(shortcut)
                         held[button] = codes

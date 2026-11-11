@@ -245,10 +245,13 @@ time). Last resort: in GRUB press `e`, delete `rhgb quiet`, `Ctrl+X`, then
 Works over USB and Bluetooth (pair once with `bluetoothctl`, then `trust` it so
 it reconnects by itself).
 
-- **Pen mapping** — `modules/tablet.lua` maps the pen to the Samsung when it is
-  connected, otherwise to the laptop panel, and crops the tablet area to the
-  screen's shape (16:9 for the Samsung) so strokes aren't stretched. It re-runs
-  when a monitor is plugged or unplugged.
+- **Pen mapping** — `modules/tablet.lua` maps the pen to the monitor Obsidian
+  is on (move Obsidian to the other screen and the pen follows), else the
+  Samsung, else the laptop panel. The tablet area is cropped to the screen's
+  shape (16:9 for the Samsung; the 16:10 laptop panel uses the whole surface)
+  so strokes aren't stretched. It re-runs when a monitor or Obsidian window
+  is added, closed or moved. Layout I use: notes on the Samsung (straight
+  ahead), video/tutorial on the laptop to the left.
 - **Pad buttons** — Hyprland has no pad bindings, so `scripts/wacom-pad.py`
   reads the pad and types shortcuts through a virtual keyboard. It is started
   from `modules/autostart.lua` and survives the tablet disconnecting.
@@ -256,13 +259,14 @@ it reconnects by itself).
   | Key | Everywhere | Obsidian, on an `.excalidraw` drawing |
   |---|---|---|
   | 1 | Undo (`Ctrl+Z`) | |
-  | 2 | Redo (`Ctrl+Shift+Z`) | |
+  | 2 | Play/pause media (`playerctl`) | |
   | 3 | | Eraser (`E`) |
   | 4 | | Pen (`P`) |
 
   To change a button, edit the `PROFILES` block at the top of the script (it
   explains the syntax), then restart it: `pkill -f wacom-pad.py` and start
   `~/.config/hypr/scripts/wacom-pad.py` again (or log out and in).
+  A value starting with `!` runs a command instead of a key (key 2 does that).
   `wacom-pad.py learn` prints each button you press with the focused window's
   class and title, for writing new rules.
 - **One-time system setup** (not in the repo):
